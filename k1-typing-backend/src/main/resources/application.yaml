@@ -1,0 +1,3 @@
+spring:
+  application:
+    name: k1-typing-backend
