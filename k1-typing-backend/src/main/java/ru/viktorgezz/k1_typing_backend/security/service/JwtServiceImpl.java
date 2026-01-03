@@ -1,0 +1,170 @@
+package ru.viktorgezz.k1_typing_backend.security.service;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.viktorgezz.k1_typing_backend.domain.user.User;
+import ru.viktorgezz.k1_typing_backend.domain.user.service.intrf.UserQueryService;
+import ru.viktorgezz.k1_typing_backend.security.JwtProperties;
+import ru.viktorgezz.k1_typing_backend.security.util.KeyUtils;
+import ru.viktorgezz.k1_typing_backend.security.exception.InvalidJwtTokenException;
+import ru.viktorgezz.k1_typing_backend.security.exception.TokenExpiredException;
+import ru.viktorgezz.k1_typing_backend.security.model.RefreshToken;
+import ru.viktorgezz.k1_typing_backend.security.repo.RefreshTokenRepo;
+
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.util.Date;
+import java.util.Map;
+
+@Service
+public class JwtServiceImpl implements JwtService {
+
+    private static final String TOKEN_TYPE = "token_type";
+    private static final String ROLE = "role";
+
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
+
+    private final long accessTokenExpiration;
+    private final long refreshTokenExpiration;
+
+    private final UserQueryService userQueryService;
+    private final RefreshTokenRepo refreshTokenRepo;
+
+    @SneakyThrows
+    @Autowired
+    public JwtServiceImpl(
+            UserQueryService userQueryService,
+            RefreshTokenRepo refreshTokenRepo,
+            JwtProperties jwtProperties
+    ) {
+        this.userQueryService = userQueryService;
+        this.refreshTokenRepo = refreshTokenRepo;
+        this.privateKey = KeyUtils.loadPrivateKey("keys/private_key.pem");
+        this.publicKey = KeyUtils.loadPublicKey("keys/public_key.pem");
+        this.accessTokenExpiration = jwtProperties.getAccessExpirationMs();
+        this.refreshTokenExpiration = jwtProperties.getRefreshExpirationMs();
+    }
+
+    public String generateAccessToken(final String username) {
+        final User userSaved = userQueryService.getByUsername(username);
+        final Map<String, Object> claims = Map.of(
+                TOKEN_TYPE, "ACCESS_TOKEN",
+                ROLE, userSaved.getRole().name()
+        );
+        return buildToken(username, claims, accessTokenExpiration);
+    }
+
+    @Transactional
+    public String generateRefreshToken(final String username) {
+
+        final User userFound = userQueryService.getByUsername(username);
+
+        final Map<String, Object> claims = Map.of(TOKEN_TYPE, "REFRESH_TOKEN");
+        final String refreshToken = buildToken(username, claims, refreshTokenExpiration);
+        RefreshToken token = new RefreshToken(
+                refreshToken,
+                new Date(System.currentTimeMillis() + refreshTokenExpiration),
+                userFound
+        );
+
+        userFound.getRefreshTokens().add(token);
+        refreshTokenRepo.save(token);
+        return refreshToken;
+    }
+
+    public boolean validateToken(final String token, final String usernameExpected) {
+        final String username = extractUsername(token);
+        return username.equals(usernameExpected) && !isTokenExpired(token);
+    }
+
+    public String extractUsername(String token) {
+        return extractClaimsStrict(token).getSubject();
+    }
+
+    public String refreshToken(final String refreshToken) {
+        final Claims claims = extractClaimsAllowExpired(refreshToken);
+        final String username = claims.getSubject();
+        if (!"REFRESH_TOKEN".equals(claims.get(TOKEN_TYPE))) {
+            throw new InvalidJwtTokenException("Invalid refresh token");
+        } else if (isExpired(claims) || isRefreshTokenWithdrown(refreshToken, username)) {
+            throw new TokenExpiredException("Refresh token expired");
+        }
+        return generateAccessToken(username);
+    }
+
+    @Transactional
+    public void dropRefreshToken(final String refreshToken) {
+        refreshTokenRepo.deleteByToken(refreshToken);
+    }
+
+    private String buildToken(
+            String username,
+            Map<String, Object> claims,
+            long expiration
+    ) {
+        return Jwts.builder()
+                .claims(claims)
+                .subject(username)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(privateKey)
+                .compact();
+    }
+
+    private boolean isTokenExpired(String token) {
+        return isExpired(extractClaimsStrict(token));
+    }
+
+    private boolean isExpired(Claims claims) {
+        return claims.getExpiration().before(new Date(System.currentTimeMillis()));
+    }
+
+    private Claims extractClaimsAllowExpired(String token) {
+        try {
+            return extractClaims(token);
+        } catch (final ExpiredJwtException e) {
+            return e.getClaims();
+        } catch (final JwtException e) {
+            throw new InvalidJwtTokenException(e.getMessage());
+        }
+    }
+
+    private Claims extractClaimsStrict(String token) {
+        try {
+            return extractClaims(token);
+        } catch (final ExpiredJwtException e) {
+            throw new TokenExpiredException("Invalid access token");
+        } catch (final JwtException e) {
+            throw new InvalidJwtTokenException(e.getMessage());
+        }
+    }
+
+    private Claims extractClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(publicKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    private boolean isRefreshTokenWithdrown(String refreshToken, String username) {
+        if (refreshToken == null) {
+            return true;
+        }
+
+        boolean tokenExists = refreshTokenRepo
+                .findRefreshTokensByUsername(username)
+                .stream()
+                .map(RefreshToken::getToken)
+                .toList()
+                .contains(refreshToken);
+        return !tokenExists;
+    }
+}

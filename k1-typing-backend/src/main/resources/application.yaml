@@ -1,3 +1,25 @@
 spring:
   application:
     name: k1-typing-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5433/${POSTGRESQL_DB:-typing_db}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+  docker:
+    compose:
+      enabled: true
+
+security:
+  jwt:
+    access-expiration-ms: 600000
+    refresh-expiration-ms: 6000000
+
+logging:
+  level:
+    ru.viktorgezz.k1_typing_backend: DEBUG

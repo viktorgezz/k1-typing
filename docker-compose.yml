@@ -1,0 +1,68 @@
+services:
+  db-typing:
+    image: postgres:18.0
+    container_name: postgres_typing_db
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRES_USER: ${POSTGRESQL_USERNAME}
+      POSTGRES_DB: ${POSTGRESQL_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data-typing:/var/lib/postgresql/data
+    networks:
+      - back-net
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "${POSTGRESQL_USERNAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-sonar:
+    image: postgres:15
+    container_name: postgres_sonar_db
+    labels:
+      - "org.springframework.boot.ignore=true"
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar_password
+      POSTGRES_DB: sonar
+    volumes:
+      - postgres-data-sonar:/var/lib/postgresql/data
+    networks:
+      - sonar-net
+
+  sonarqube:
+    image: sonarqube:10.7.0-community
+    container_name: sonarqube
+    labels:
+      - "org.springframework.boot.ignore=true"
+    depends_on:
+      db-sonar:
+        condition: service_started
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db-sonar:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar_password
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    networks:
+      - sonar-net
+
+networks:
+  back-net:
+    driver: bridge
+  sonar-net:
+    driver: bridge
+
+volumes:
+  postgres-data-typing:
+  postgres-data-sonar:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:

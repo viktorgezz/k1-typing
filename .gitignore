@@ -74,8 +74,25 @@ coverage/
 *.lcov
 .nyc_output
 
+# Cypress
+**/cypress/videos/
+**/cypress/screenshots/
+
+# Vitest
+__screenshots__/
+
+# Build cache
+*.tsbuildinfo
+.eslintcache
+
+# Logs directory
+logs/
+
 # Temporary files
 *.log
 .cache/
 .temp/
 .tmp/
+
+# Vite cache
+.vite/
