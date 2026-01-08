@@ -118,10 +118,30 @@ export function clearAuthData() {
 }
 
 /**
- * Проверить наличие токенов
+ * Проверить, истёк ли access token
+ * @returns {boolean} true если токен истёк или отсутствует
+ */
+export function isAccessTokenExpired() {
+  const token = getAccessToken()
+  if (!token) return true
+
+  try {
+    // JWT состоит из трёх частей: header.payload.signature
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    // exp — время истечения в секундах
+    const expirationTime = payload.exp * 1000
+    // Считаем токен истёкшим за 30 секунд до реального истечения
+    return Date.now() >= expirationTime - 30000
+  } catch {
+    return true
+  }
+}
+
+/**
+ * Проверить наличие и валидность токенов
  * @returns {boolean}
  */
 export function hasValidTokens() {
-  return !!(getAccessToken() && getRefreshToken())
+  return !!(getAccessToken() && getRefreshToken() && !isAccessTokenExpired())
 }
 

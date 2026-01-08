@@ -56,6 +56,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         final String refreshToken = jwtService.generateRefreshToken(user.getUsername());
         final String tokenType = "Bearer";
 
+        log.debug("acces token: {}", accessToken);
+
         return new AuthenticationResponse(
                 accessToken,
                 refreshToken,
@@ -106,7 +108,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .map(RefreshToken::getToken)
                     .toList();
 
-            log.debug("id user: {}, refreshTokens: {}", idUser, refreshTokens);
+            log.debug("current refreshToken: {}, id user: {}, refreshTokens: {}",
+                    refreshToken, idUser, refreshTokens);
 
             if (!refreshTokens.contains(refreshToken)) {
                 throw new AccessDeniedException("Token does not belong to current user");

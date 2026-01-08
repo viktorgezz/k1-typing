@@ -5,4 +5,10 @@ import ru.viktorgezz.k1_typing_backend.domain.user.User;
 public interface UserQueryService {
 
     User getByUsername(String username);
+
+    User getOne(Long id);
+
+    User getMyself();
+
+    User findUserByUsername(String username);
 }

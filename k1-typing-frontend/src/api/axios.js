@@ -4,6 +4,7 @@ import {
   getRefreshToken,
   setAccessToken,
   clearAuthData,
+  isAccessTokenExpired,
 } from '@/services/tokenStorage'
 
 // Флаг для предотвращения множественных запросов на обновление токена
@@ -36,10 +37,62 @@ const apiClient = axios.create({
   withCredentials: true,
 })
 
+// Флаг для предотвращения множественных запросов на проактивное обновление токена
+let isProactiveRefreshing = false
+// Promise для ожидания завершения проактивного обновления
+let proactiveRefreshPromise = null
+
+/**
+ * Проактивное обновление токена, если он истёк
+ * @returns {Promise<string|null>} Новый токен или null
+ */
+async function refreshTokenIfExpired() {
+  const token = getAccessToken()
+
+  // Если токена нет или он не истёк — возвращаем текущий
+  if (!token || !isAccessTokenExpired()) {
+    return token
+  }
+
+  // Если уже идёт обновление — ждём его завершения
+  if (isProactiveRefreshing && proactiveRefreshPromise) {
+    return proactiveRefreshPromise
+  }
+
+  const refreshToken = getRefreshToken()
+  if (!refreshToken) {
+    clearAuthData()
+    return null
+  }
+
+  isProactiveRefreshing = true
+  proactiveRefreshPromise = (async () => {
+    try {
+      const response = await axios.post(
+        `${apiClient.defaults.baseURL}/auth/refresh`,
+        { refreshToken },
+        { withCredentials: true }
+      )
+      const { access_token } = response.data
+      setAccessToken(access_token)
+      return access_token
+    } catch {
+      clearAuthData()
+      return null
+    } finally {
+      isProactiveRefreshing = false
+      proactiveRefreshPromise = null
+    }
+  })()
+
+  return proactiveRefreshPromise
+}
+
 // Interceptor для добавления токена к запросам
 apiClient.interceptors.request.use(
-  (config) => {
-    const token = getAccessToken()
+  async (config) => {
+    // Проактивно обновляем токен, если он истёк
+    const token = await refreshTokenIfExpired()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }

@@ -25,6 +25,6 @@ public interface RefreshTokenRepo extends CrudRepository<RefreshToken, Long> {
 
     @Modifying
     @Query("DELETE FROM RefreshToken rt WHERE rt.dateExpiration < :dateNow")
-    void deleteExpiredTokens(@Param("dateNow") Date dateNow);
+    int deleteExpiredTokens(@Param("dateNow") Date dateNow);
 
 }

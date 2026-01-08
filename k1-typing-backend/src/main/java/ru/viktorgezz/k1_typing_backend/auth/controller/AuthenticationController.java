@@ -1,10 +1,19 @@
 package ru.viktorgezz.k1_typing_backend.auth.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import ru.viktorgezz.k1_typing_backend.auth.dto.*;
+import ru.viktorgezz.k1_typing_backend.auth.dto.AuthenticationRequest;
+import ru.viktorgezz.k1_typing_backend.auth.dto.AuthenticationResponse;
+import ru.viktorgezz.k1_typing_backend.auth.dto.LogoutRequest;
+import ru.viktorgezz.k1_typing_backend.auth.dto.RefreshRequest;
+import ru.viktorgezz.k1_typing_backend.auth.dto.RegistrationRequest;
 import ru.viktorgezz.k1_typing_backend.auth.service.AuthenticationService;
 import ru.viktorgezz.k1_typing_backend.domain.user.Role;
 
@@ -28,7 +37,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public void logout(final LogoutRequest refreshTokenDto){
+    public void logout(@RequestBody @Valid final LogoutRequest refreshTokenDto){
         authenticationService.logout(refreshTokenDto.refreshToken());
     }
 

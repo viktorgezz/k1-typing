@@ -1,0 +1,27 @@
+package ru.viktorgezz.k1_typing_backend.domain.exercises.dto.rq;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import ru.viktorgezz.k1_typing_backend.domain.exercises.Language;
+
+public record CreationExerciseRqDto(
+        @NotBlank(message = "Название упражнения не должен быть пустым")
+        @Size(
+                min = 1,
+                max = 200,
+                message = "Длина названия упражнения должна быть от 1 до 200 символов"
+        )
+        String title,
+        @NotBlank(message = "Текст упражнения не должен быть пустым")
+        @Size(
+                min = 10,
+                max = 10000,
+                message = "Длина текста упражнения должна быть от 10 до 10000 символов"
+        )
+        String text,
+        @NotNull(message = "Язык упражнения должен быть указан")
+        Language language
+) {
+
+}

@@ -8,6 +8,11 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: () => import('@/views/HomeView.vue'),
+    },
+    {
+      path: '/exercise/:id',
+      name: 'exercise',
+      component: () => import('@/views/ExerciseView.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -21,6 +26,12 @@ const router = createRouter({
       name: 'register',
       component: () => import('@/views/RegisterView.vue'),
       meta: { guest: true },
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: () => import('@/views/ProfileView.vue'),
+      meta: { requiresAuth: true },
     },
   ],
 })

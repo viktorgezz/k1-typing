@@ -140,7 +140,7 @@ public class JwtServiceImpl implements JwtService {
         try {
             return extractClaims(token);
         } catch (final ExpiredJwtException e) {
-            throw new TokenExpiredException("Invalid access token");
+            throw new TokenExpiredException(String.format("Invalid access token: %s", e.getMessage()));
         } catch (final JwtException e) {
             throw new InvalidJwtTokenException(e.getMessage());
         }

@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: k1-typing-backend
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  docker:
+    compose:
+      enabled: false
+
+security:
+  jwt:
+    access-expiration-ms: 600000
+    refresh-expiration-ms: 6000000
+
+logging:
+  level:
+    ru.viktorgezz.k1_typing_backend: DEBUG

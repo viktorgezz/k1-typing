@@ -52,4 +52,13 @@ public class ResultItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")
     private User user;
+
+    public ResultItem(Long durationSeconds, Integer speed, BigDecimal accuracy, Place place, Contest contest, User user) {
+        this.durationSeconds = durationSeconds;
+        this.speed = speed;
+        this.accuracy = accuracy;
+        this.place = place;
+        this.contest = contest;
+        this.user = user;
+    }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -62,6 +63,10 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(PUBLIC_URLS)
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/exercise", "/exercise/**")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/contest/single")
                                 .permitAll()
                                 .anyRequest()
                                 .hasAnyRole(Arrays.stream(Role.values()).map(Role::name).toArray(String[]::new))

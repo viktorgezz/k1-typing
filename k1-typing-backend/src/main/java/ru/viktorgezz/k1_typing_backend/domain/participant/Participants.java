@@ -30,5 +30,10 @@ public class Participants {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_user")
     private User user;
+
+    public Participants(Contest contest, User user) {
+        this.contest = contest;
+        this.user = user;
+    }
 }
 

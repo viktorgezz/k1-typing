@@ -3,26 +3,39 @@
 /* Глобальные стили для приложения K1 Typing */
 
 :root {
-  /* Цвета для градиентного фона */
-  --mint-light: #d4f5ed;
-  --aquamarine: #7ee8c5;
-  --turquoise: #00b5a3;
+  /* Цвета для градиентного фона - тёплый персиково-жёлтый */
+  --peach-light: #FFB88C;
+  --coral: #FFA07A;
+  --lemon: #EDE574;
   
   /* Нейтральные цвета для альтернативного фона */
-  --neutral-bg: #f5f7fa;
-  --neutral-dark: #2c3e50;
-  --neutral-medium: #7f8c9a;
+  --neutral-bg: #FFF8F0;
+  --neutral-dark: #4A3728;
+  --neutral-medium: #8B7355;
   
   /* Цвета для UI элементов */
-  --text-primary: #2c3e50;
-  --text-secondary: #7f8c9a;
+  --text-primary: #4A3728;
+  --text-secondary: #8B7355;
   --text-light: #ffffff;
-  --error: #e74c3c;
-  --success: #27ae60;
+  --error: #E74C3C;
+  --success: #27AE60;
   
   /* Параметры форм */
   --form-max-width: 420px;
   --border-radius: 16px;
+}
+
+/* Анимация переливания градиента */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 * {
@@ -44,20 +57,29 @@ body {
   flex-direction: column;
 }
 
-/* Градиентный фон */
+/* Градиентный фон с анимацией переливания */
 .bg-gradient {
   background: linear-gradient(
-    180deg,
-    var(--mint-light) 0%,
-    var(--aquamarine) 50%,
-    var(--turquoise) 100%
+    45deg,
+    #FFB88C 0%,
+    #FFA07A 50%,
+    #EDE574 84%
   );
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
   min-height: 100vh;
 }
 
-/* Нейтральный фон */
+/* Нейтральный фон с анимацией переливания */
 .bg-neutral {
-  background-color: var(--neutral-bg);
+  background: linear-gradient(
+    45deg,
+    #FFB88C 0%,
+    #FFA07A 50%,
+    #EDE574 84%
+  );
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
   min-height: 100vh;
 }
 
@@ -119,9 +141,9 @@ body {
 }
 
 .form-input:focus {
-  border-color: var(--aquamarine);
+  border-color: var(--coral);
   background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 0 4px rgba(126, 232, 197, 0.15);
+  box-shadow: 0 0 0 4px rgba(255, 160, 122, 0.25);
 }
 
 .form-input.error {
@@ -154,26 +176,26 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--aquamarine) 0%, var(--turquoise) 100%);
-  color: #0f172a;
+  background: linear-gradient(135deg, var(--coral) 0%, var(--lemon) 100%);
+  color: #4A3728;
   font-weight: 700;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--mint-light) 0%, var(--aquamarine) 100%);
+  background: linear-gradient(135deg, var(--peach-light) 0%, var(--coral) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(126, 232, 197, 0.45);
+  box-shadow: 0 10px 25px rgba(255, 160, 122, 0.45);
 }
 
 .btn-secondary {
   background-color: rgba(255, 255, 255, 0.1);
-  color: var(--aquamarine);
-  border: 1px solid rgba(126, 232, 197, 0.5);
+  color: var(--coral);
+  border: 1px solid rgba(255, 160, 122, 0.5);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: rgba(126, 232, 197, 0.2);
-  border-color: var(--aquamarine);
+  background-color: rgba(255, 160, 122, 0.2);
+  border-color: var(--coral);
 }
 
 .btn:disabled {
@@ -190,14 +212,15 @@ body {
 }
 
 .form-link a {
-  color: var(--aquamarine);
+  color: var(--lemon);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .form-link a:hover {
-  color: var(--mint-light);
+  color: #fff;
   text-decoration: underline;
 }
 
@@ -210,9 +233,9 @@ body {
 }
 
 .message-success {
-  background-color: rgba(126, 232, 197, 0.15);
-  color: var(--aquamarine);
-  border: 1px solid rgba(126, 232, 197, 0.4);
+  background-color: rgba(237, 229, 116, 0.2);
+  color: var(--lemon);
+  border: 1px solid rgba(237, 229, 116, 0.5);
 }
 
 .message-error {

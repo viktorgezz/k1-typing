@@ -11,13 +11,20 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    USER_NOT_FOUND("NOT_FOUND", "User with username: %s - not found", HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND(Constants.NOT_FOUND, "User with username: %s - not found", HttpStatus.NOT_FOUND),
+    EXERCISE_NOT_FOUND(Constants.NOT_FOUND, "Exercise - not found", HttpStatus.NOT_FOUND),
+    CONTEST_NOT_FOUND(Constants.NOT_FOUND, "Contest with id: %s - not found ", HttpStatus.NOT_FOUND),
     BAD_CREDENTIALS("BAD_CREDENTIALS", "Username and / or password is incorrect", HttpStatus.UNAUTHORIZED),
-    TOKEN_REFRESH_EXPIRED("UNAUTHORIZED", "JWT token is expired",  HttpStatus.UNAUTHORIZED),
+    TOKEN_REFRESH_EXPIRED("UNAUTHORIZED", "JWT token is expired", HttpStatus.UNAUTHORIZED),
     PASSWORD_MISMATCH("PASSWORD_MISMATCH", "Current password and new password are not the same", HttpStatus.BAD_REQUEST),
+    USERNAME_ALREADY_EXISTS("USERNAME_ALREADY_EXISTS", "Username: %s - already exists", HttpStatus.BAD_REQUEST),
     INTERNAL_EXCEPTION("INTERNAL_EXCEPTION", "Internal error", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;
     private final String defaultMessage;
     private final HttpStatus status;
+
+    private static class Constants {
+        private static final String NOT_FOUND = "NOT_FOUND";
+    }
 }
