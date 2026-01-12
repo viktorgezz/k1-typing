@@ -45,21 +45,21 @@ public class User implements UserDetails {
             fetch = FetchType.LAZY,
             orphanRemoval = true
     )
-    List<RefreshToken> refreshTokens = new ArrayList<>();
+    private transient List<RefreshToken> refreshTokens = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "user",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             fetch = FetchType.LAZY
     )
-    List<Exercise> exercise = new ArrayList<>();
+    private transient List<Exercise> exercises = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "user",
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
             fetch = FetchType.LAZY
     )
-    private List<Participants> participants;
+    private transient List<Participants> participants;
 
     @Column(name = "is_enabled")
     private boolean enabled;

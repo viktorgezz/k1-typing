@@ -12,6 +12,9 @@ const typingStore = useTypingStore()
 // Refs
 const typingAreaRef = ref(null)
 const hasError = ref(false)
+const showPauseHint = ref(true)
+const pauseHintFading = ref(false)
+let pauseHintTimeout = null
 
 // Загрузка упражнения
 onMounted(async () => {
@@ -33,22 +36,47 @@ onMounted(async () => {
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
   typingStore.resetState()
+  if (pauseHintTimeout) {
+    clearTimeout(pauseHintTimeout)
+  }
 })
 
 // Обработчик нажатия клавиши
 function handleKeyDown(event) {
   // Игнорируем специальные клавиши
   if (event.ctrlKey || event.altKey || event.metaKey) return
-  if (event.key === 'Tab' || event.key === 'Escape') return
+  if (event.key === 'Tab') return
 
-  // Игнорируем, если упражнение завершено
-  if (typingStore.isFinished) return
+  // Обработка Escape — пауза/продолжение
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    if (typingStore.isPaused) {
+      typingStore.resume()
+    } else if (typingStore.isStarted && !typingStore.isFinished) {
+      typingStore.pause()
+    }
+    return
+  }
+
+  // Игнорируем, если упражнение на паузе или завершено
+  if (typingStore.isPaused || typingStore.isFinished) return
 
   event.preventDefault()
 
   // Обрабатываем только печатные символы
   if (event.key.length === 1 || event.key === ' ') {
     const { correct } = typingStore.processKey(event.key)
+
+    // Запускаем таймер для скрытия подсказки о паузе
+    if (showPauseHint.value && !pauseHintTimeout) {
+      pauseHintTimeout = setTimeout(() => {
+        pauseHintFading.value = true
+        // После завершения анимации скрываем элемент
+        setTimeout(() => {
+          showPauseHint.value = false
+        }, 500) // Длительность анимации fade-out
+      }, 3000)
+    }
 
     // Визуальная обратная связь при ошибке
     if (!correct) {
@@ -143,6 +171,11 @@ function goHome() {
   router.push('/')
 }
 
+// Продолжить после паузы
+function resumeExercise() {
+  typingStore.resume()
+}
+
 // Перезапуск упражнения
 async function restartExercise() {
   await typingStore.restart()
@@ -206,6 +239,47 @@ async function restartExercise() {
         <div class="error-icon">⚠</div>
         <p>{{ typingStore.error }}</p>
         <button class="btn btn-primary" @click="goHome">Вернуться на главную</button>
+      </div>
+
+      <!-- Экран паузы -->
+      <div v-else-if="typingStore.isPaused" class="pause-screen">
+        <div class="pause-card">
+          <div class="pause-icon">⏸</div>
+          <h2 class="pause-title">Пауза</h2>
+
+          <div class="pause-stats">
+            <div class="pause-stat">
+              <span class="pause-stat-value">{{ typingStore.formattedTime }}</span>
+              <span class="pause-stat-label">Время</span>
+            </div>
+            <div class="pause-stat">
+              <span class="pause-stat-value">{{ typingStore.speed }}</span>
+              <span class="pause-stat-label">Символов/мин</span>
+            </div>
+            <div class="pause-stat">
+              <span class="pause-stat-value">{{ typingStore.accuracy }}%</span>
+              <span class="pause-stat-label">Точность</span>
+            </div>
+            <div class="pause-stat">
+              <span class="pause-stat-value">{{ typingStore.errors }}</span>
+              <span class="pause-stat-label">Ошибок</span>
+            </div>
+          </div>
+
+          <div class="pause-actions">
+            <button class="btn btn-primary" @click="resumeExercise">
+              Продолжить
+            </button>
+            <button class="btn btn-secondary" @click="restartExercise">
+              Начать заново
+            </button>
+            <button class="btn btn-ghost" @click="goHome">
+              Выйти
+            </button>
+          </div>
+
+          <p class="pause-hint">Нажмите <kbd>Esc</kbd> для продолжения</p>
+        </div>
       </div>
 
       <!-- Экран завершения -->
@@ -297,6 +371,13 @@ async function restartExercise() {
         <!-- Подсказка -->
         <p v-if="!typingStore.isStarted" class="typing-hint">
           Начните печатать для старта упражнения
+        </p>
+        <p 
+          v-else-if="showPauseHint" 
+          class="typing-hint pause-hint-inline"
+          :class="{ 'fade-out': pauseHintFading }"
+        >
+          Нажмите <kbd>Esc</kbd> для паузы
         </p>
 
         <!-- Визуальные подсказки -->
@@ -582,6 +663,28 @@ async function restartExercise() {
   animation: fadeInOut 2s ease infinite;
 }
 
+.pause-hint-inline {
+  opacity: 0.6;
+  animation: none;
+  transition: opacity 0.5s ease;
+}
+
+.pause-hint-inline.fade-out {
+  opacity: 0;
+}
+
+.pause-hint-inline kbd {
+  display: inline-block;
+  padding: 3px 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(74, 55, 40, 0.2);
+  border: 1px solid rgba(74, 55, 40, 0.3);
+  border-radius: 4px;
+  margin: 0 2px;
+}
+
 @keyframes fadeInOut {
   0%,
   100% {
@@ -735,6 +838,108 @@ async function restartExercise() {
   padding: 14px 24px;
 }
 
+/* Экран паузы */
+.pause-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  width: 100%;
+}
+
+.pause-card {
+  max-width: 500px;
+  width: 100%;
+  padding: 48px;
+  background: rgba(74, 55, 40, 0.92);
+  border-radius: 24px;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 16px 48px rgba(74, 55, 40, 0.5);
+  text-align: center;
+}
+
+.pause-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.9;
+}
+
+.pause-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 32px;
+}
+
+.pause-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.pause-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.pause-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--lemon);
+}
+
+.pause-stat-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.pause-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pause-actions .btn {
+  margin-top: 0;
+  padding: 14px 24px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.pause-hint {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.pause-hint kbd {
+  display: inline-block;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  margin: 0 4px;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
   .exercise-header {
@@ -804,6 +1009,18 @@ async function restartExercise() {
 
   .completion-actions {
     flex-direction: column;
+  }
+
+  .pause-card {
+    padding: 32px 24px;
+  }
+
+  .pause-stats {
+    gap: 12px;
+  }
+
+  .pause-stat-value {
+    font-size: 22px;
   }
 }
 </style>

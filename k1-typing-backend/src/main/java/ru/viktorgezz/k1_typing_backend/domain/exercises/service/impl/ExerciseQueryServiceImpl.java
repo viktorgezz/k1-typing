@@ -1,10 +1,11 @@
 package ru.viktorgezz.k1_typing_backend.domain.exercises.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.Exercise;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.dto.rs.ExerciseListItemRsDto;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.repo.ExercisePagingAndSortingRepo;
@@ -28,7 +29,8 @@ public class ExerciseQueryServiceImpl implements ExerciseQueryService {
                 .map(exercise -> new ExerciseListItemRsDto(
                         exercise.getId(),
                         exercise.getTitle(),
-                        exercise.getUser().getUsername()
+                        exercise.getUser().getUsername(),
+                        exercise.getLanguage()
                 ));
     }
 

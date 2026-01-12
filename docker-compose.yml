@@ -18,6 +18,21 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass "${REDIS_PASSWORD:-my_secure_password_123}"
+    volumes:
+      - redis-data:/data
+    networks:
+      - back-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-my_secure_password_123}", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   db-sonar:
     image: postgres:15
     container_name: postgres_sonar_db
@@ -66,3 +81,4 @@ volumes:
   sonarqube_data:
   sonarqube_extensions:
   sonarqube_logs:
+  redis-data:

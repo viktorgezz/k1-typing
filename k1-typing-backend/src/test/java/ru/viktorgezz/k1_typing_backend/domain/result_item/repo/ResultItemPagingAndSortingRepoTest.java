@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
-import ru.viktorgezz.k1_typing_backend.domain.contest.ContestRepo;
+import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestRepo;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.Exercise;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.repo.ExerciseRepo;

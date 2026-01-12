@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { exercisesAPI } from '@/api/exercises'
-import { contestAPI } from '@/api/contest'
 import { resultItemAPI } from '@/api/resultItem'
 
 /**
@@ -15,9 +14,6 @@ export const useTypingStore = defineStore('typing', () => {
   const exerciseText = ref('')
   const exerciseLanguage = ref('RU') // RU или ENG
 
-  // Контест
-  const contestId = ref(null)
-
   // Прогресс набора
   const currentIndex = ref(0)
   const typedCorrectly = ref(0)
@@ -27,6 +23,7 @@ export const useTypingStore = defineStore('typing', () => {
   // Состояние сессии
   const isStarted = ref(false)
   const isFinished = ref(false)
+  const isPaused = ref(false)
   const startTime = ref(null)
   const endTime = ref(null)
 
@@ -87,10 +84,6 @@ export const useTypingStore = defineStore('typing', () => {
       exerciseId.value = exercise.id
       exerciseText.value = exercise.text
       exerciseLanguage.value = exercise.language || 'RU'
-
-      // Создаём контест
-      const contest = await contestAPI.createSingle(id)
-      contestId.value = contest.idContest
 
       return { success: true }
     } catch (err) {
@@ -164,6 +157,24 @@ export const useTypingStore = defineStore('typing', () => {
   }
 
   /**
+   * Поставить на паузу
+   */
+  function pause() {
+    if (!isStarted.value || isFinished.value || isPaused.value) return
+    stopTimer()
+    isPaused.value = true
+  }
+
+  /**
+   * Продолжить после паузы
+   */
+  function resume() {
+    if (!isPaused.value) return
+    isPaused.value = false
+    startTimer()
+  }
+
+  /**
    * Завершить сессию и сохранить результат
    */
   async function finishSession() {
@@ -172,14 +183,14 @@ export const useTypingStore = defineStore('typing', () => {
     endTime.value = Date.now()
 
     // Сохраняем результат на сервере
-    if (contestId.value) {
+    if (exerciseId.value) {
       try {
         loading.value = true
         result.value = await resultItemAPI.saveSingleContestResult({
           durationSeconds: elapsedSeconds.value,
           speed: speed.value,
           accuracy: accuracy.value,
-          idContest: contestId.value,
+          idExercises: exerciseId.value,
         })
       } catch (err) {
         error.value = err.response?.data?.message || 'Ошибка сохранения результата'
@@ -198,13 +209,13 @@ export const useTypingStore = defineStore('typing', () => {
     exerciseId.value = null
     exerciseText.value = ''
     exerciseLanguage.value = 'RU'
-    contestId.value = null
     currentIndex.value = 0
     typedCorrectly.value = 0
     errors.value = 0
     errorPositions.value = new Set()
     isStarted.value = false
     isFinished.value = false
+    isPaused.value = false
     startTime.value = null
     endTime.value = null
     elapsedSeconds.value = 0
@@ -227,12 +238,12 @@ export const useTypingStore = defineStore('typing', () => {
     exerciseId,
     exerciseText,
     exerciseLanguage,
-    contestId,
     currentIndex,
     typedCorrectly,
     errors,
     isStarted,
     isFinished,
+    isPaused,
     elapsedSeconds,
     loading,
     error,
@@ -253,6 +264,8 @@ export const useTypingStore = defineStore('typing', () => {
     finishSession,
     resetState,
     restart,
+    pause,
+    resume,
   }
 })
 

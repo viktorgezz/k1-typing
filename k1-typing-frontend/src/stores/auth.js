@@ -6,6 +6,7 @@ import {
   getUser,
   clearAuthData,
   setUser,
+  getAccessToken,
 } from '@/services/tokenStorage'
 
 /**
@@ -21,6 +22,21 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => hasValidTokens())
 
   const username = computed(() => user.value?.username || null)
+
+  /**
+   * Получить userId из JWT токена
+   */
+  const userId = computed(() => {
+    const token = getAccessToken()
+    if (!token) return null
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      return payload.userId || payload.id || payload.sub || null
+    } catch {
+      return null
+    }
+  })
 
   // Actions
   /**
@@ -132,6 +148,7 @@ export const useAuthStore = defineStore('auth', () => {
     // Getters
     isAuthenticated,
     username,
+    userId,
     // Actions
     register,
     login,

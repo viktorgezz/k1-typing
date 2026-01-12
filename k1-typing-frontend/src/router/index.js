@@ -13,6 +13,11 @@ const router = createRouter({
       path: '/exercise/:id',
       name: 'exercise',
       component: () => import('@/views/ExerciseView.vue'),
+    },
+    {
+      path: '/contest/:id',
+      name: 'contest',
+      component: () => import('@/views/ContestRoomView.vue'),
       meta: { requiresAuth: true },
     },
     {

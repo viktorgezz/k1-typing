@@ -15,7 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
-import ru.viktorgezz.k1_typing_backend.domain.contest.ContestRepo;
+import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestRepo;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.Exercise;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.repo.ExerciseRepo;
@@ -52,7 +52,6 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
 
     private User userAuthenticated;
     private Exercise exerciseExisting;
-    private Contest contestExisting;
 
     @BeforeEach
     void setUp() {
@@ -71,7 +70,7 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
                 new Exercise("Test Exercise", "Test exercise text content", userAuthenticated)
         );
 
-        contestExisting = contestRepo.save(
+        contestRepo.save(
                 new Contest(Status.PROGRESS, 1, exerciseExisting)
         );
     }
@@ -103,7 +102,7 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
                     120L,
                     85,
                     new BigDecimal("95.50"),
-                    contestExisting.getId()
+                    exerciseExisting.getId()
             );
 
             RecordedResulItemRsDto resultRecorded = resultItemCommandService.saveResultSingleContest(requestValid);
@@ -123,30 +122,13 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
                     100L,
                     70,
                     new BigDecimal("88.00"),
-                    contestExisting.getId()
+                    exerciseExisting.getId()
             );
 
             RecordedResulItemRsDto resultRecorded = resultItemCommandService.saveResultSingleContest(requestValid);
 
             assertThat(resultRecorded).isNotNull();
             assertThat(resultRecorded.durationSeconds()).isEqualTo(100L);
-        }
-
-        @Test
-        @DisplayName("Статус контеста изменяется на FINISHED после сохранения результата")
-        void saveResultSingleContest_ShouldChangeContestStatusToFinished_WhenResultSaved() {
-            setSecurityContext(userAuthenticated);
-            ResulItemRqDto requestValid = new ResulItemRqDto(
-                    150L,
-                    90,
-                    new BigDecimal("99.00"),
-                    contestExisting.getId()
-            );
-
-            resultItemCommandService.saveResultSingleContest(requestValid);
-
-            Contest contestUpdated = contestRepo.findById(contestExisting.getId()).orElseThrow();
-            assertThat(contestUpdated.getStatus()).isEqualTo(Status.FINISHED);
         }
 
         @Test
@@ -157,7 +139,7 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
                     180L,
                     100,
                     new BigDecimal("100.00"),
-                    contestExisting.getId()
+                    exerciseExisting.getId()
             );
 
             resultItemCommandService.saveResultSingleContest(requestValid);
@@ -167,41 +149,40 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
         }
 
         @Test
-        @DisplayName("Выброс исключения при сохранении результата для несуществующего контеста")
-        void saveResultSingleContest_ShouldThrowException_WhenContestNotFound() {
+        @DisplayName("Выброс исключения при сохранении результата для несуществующего упражнения")
+        void saveResultSingleContest_ShouldThrowException_WhenExerciseNotFound() {
             setSecurityContext(userAuthenticated);
-            Long idContestNonExistent = 999999L;
+            Long idExerciseNonExistent = 999999L;
             ResulItemRqDto requestInvalid = new ResulItemRqDto(
                     120L,
                     85,
                     new BigDecimal("95.50"),
-                    idContestNonExistent
+                    idExerciseNonExistent
             );
 
             assertThatThrownBy(() -> resultItemCommandService.saveResultSingleContest(requestInvalid))
                     .isInstanceOf(BusinessException.class)
                     .satisfies(exception -> {
                         BusinessException exceptionBusiness = (BusinessException) exception;
-                        assertThat(exceptionBusiness.getErrorCode()).isEqualTo(ErrorCode.CONTEST_NOT_FOUND);
+                        assertThat(exceptionBusiness.getErrorCode()).isEqualTo(ErrorCode.EXERCISE_NOT_FOUND);
                     });
         }
 
         @Test
-        @DisplayName("Результат связывается с указанным контестом")
-        void saveResultSingleContest_ShouldLinkResultToContest_WhenContestExists() {
+        @DisplayName("Результат связывается с созданным контестом")
+        void saveResultSingleContest_ShouldLinkResultToCreatedContest_WhenExerciseExists() {
             setSecurityContext(userAuthenticated);
             ResulItemRqDto requestValid = new ResulItemRqDto(
                     200L,
                     110,
                     new BigDecimal("97.25"),
-                    contestExisting.getId()
+                    exerciseExisting.getId()
             );
 
             resultItemCommandService.saveResultSingleContest(requestValid);
 
             ResultItem resultItemSaved = resultItemRepo.findAll().iterator().next();
             assertThat(resultItemSaved.getContest()).isNotNull();
-            assertThat(resultItemSaved.getContest().getId()).isEqualTo(contestExisting.getId());
         }
 
         @Test
@@ -212,7 +193,7 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
                     130L,
                     75,
                     new BigDecimal("85.00"),
-                    contestExisting.getId()
+                    exerciseExisting.getId()
             );
 
             resultItemCommandService.saveResultSingleContest(requestValid);
@@ -230,7 +211,7 @@ class ResultItemCommandServiceIntegrationTest extends AbstractIntegrationPostgre
                     140L,
                     80,
                     new BigDecimal("90.00"),
-                    contestExisting.getId()
+                    exerciseExisting.getId()
             );
 
             RecordedResulItemRsDto resultRecorded = resultItemCommandService.saveResultSingleContest(requestValid);

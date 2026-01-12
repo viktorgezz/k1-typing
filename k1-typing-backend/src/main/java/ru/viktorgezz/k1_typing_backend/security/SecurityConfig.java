@@ -48,6 +48,16 @@ public class SecurityConfig {
             "/ui/auth/**",
     };
 
+    /**
+     * WebSocket endpoints - аутентификация происходит на уровне STOMP,
+     * поэтому HTTP handshake разрешаем всем.
+     */
+    private static final String[] WEBSOCKET_URLS = {
+            "/ws/**",
+            "/ws/contest/**",
+            "/ws/contest",
+    };
+
     private final JwtService jwtService;
     private final UserRepo userRepo;
 
@@ -64,9 +74,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers(PUBLIC_URLS)
                                 .permitAll()
+                                .requestMatchers(WEBSOCKET_URLS)
+                                .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/exercise", "/exercise/**")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.POST, "/contest/single")
+                                .requestMatchers(HttpMethod.POST, "/result_item/single-contest")
                                 .permitAll()
                                 .anyRequest()
                                 .hasAnyRole(Arrays.stream(Role.values()).map(Role::name).toArray(String[]::new))

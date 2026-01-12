@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
-import ru.viktorgezz.k1_typing_backend.domain.contest.ContestRepo;
+import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestRepo;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
-import ru.viktorgezz.k1_typing_backend.domain.contest.dto.CreationContestRqDto;
+import ru.viktorgezz.k1_typing_backend.domain.contest.dto.rq.CreationContestRqDto;
 import ru.viktorgezz.k1_typing_backend.domain.contest.service.intrf.ContestCommandService;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.Exercise;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.repo.ExerciseRepo;
@@ -87,7 +87,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Успешное создание контеста с привязкой к авторизованному пользователю")
         void createSingle_ShouldCreateContestWithParticipant_WhenUserAuthenticated() {
             setSecurityContext(userAuthenticated);
-            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId());
+            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId(), Status.PROGRESS);
 
             Contest contestCreated = contestCommandService.createSingle(requestValid);
 
@@ -105,7 +105,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Успешное создание контеста без авторизации с участником без пользователя")
         void createSingle_ShouldCreateContestWithNullUser_WhenUserNotAuthenticated() {
             SecurityContextHolder.clearContext();
-            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId());
+            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId(), Status.PROGRESS);
 
             Contest contestCreated = contestCommandService.createSingle(requestValid);
 
@@ -122,7 +122,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         void createSingle_ShouldThrowException_WhenExerciseNotFound() {
             setSecurityContext(userAuthenticated);
             Long idExerciseNonExistent = 999999L;
-            CreationContestRqDto requestInvalid = new CreationContestRqDto(idExerciseNonExistent);
+            CreationContestRqDto requestInvalid = new CreationContestRqDto(idExerciseNonExistent, Status.FINISHED);
 
             assertThatThrownBy(() -> contestCommandService.createSingle(requestInvalid))
                     .isInstanceOf(BusinessException.class)
@@ -136,7 +136,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Контест сохраняется в базе данных после создания")
         void createSingle_ShouldPersistContest_WhenCreatedSuccessfully() {
             setSecurityContext(userAuthenticated);
-            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId());
+            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId(), Status.FINISHED);
 
             Contest contestCreated = contestCommandService.createSingle(requestValid);
 
@@ -147,7 +147,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Участник контеста сохраняется в базе данных после создания")
         void createSingle_ShouldPersistParticipant_WhenCreatedSuccessfully() {
             setSecurityContext(userAuthenticated);
-            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId());
+            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId(), Status.FINISHED);
 
             Contest contestCreated = contestCommandService.createSingle(requestValid);
 
@@ -159,7 +159,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Контест связывается с указанным упражнением")
         void createSingle_ShouldLinkContestToExercise_WhenExerciseExists() {
             setSecurityContext(userAuthenticated);
-            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId());
+            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId(), Status.FINISHED);
 
             Contest contestCreated = contestCommandService.createSingle(requestValid);
 
@@ -177,7 +177,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Успешное удаление существующего контеста")
         void delete_ShouldRemoveContest_WhenContestExists() {
             setSecurityContext(userAuthenticated);
-            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId());
+            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId(), Status.FINISHED);
             Contest contestCreated = contestCommandService.createSingle(requestValid);
             Long idContestCreated = contestCreated.getId();
 
@@ -202,7 +202,7 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Участники контеста удаляются вместе с контестом")
         void delete_ShouldRemoveParticipants_WhenContestDeleted() {
             setSecurityContext(userAuthenticated);
-            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId());
+            CreationContestRqDto requestValid = new CreationContestRqDto(exerciseExisting.getId(), Status.FINISHED);
             Contest contestCreated = contestCommandService.createSingle(requestValid);
             Long idParticipant = contestCreated.getParticipants().getFirst().getId();
 
@@ -220,8 +220,8 @@ class ContestCommandServiceIntegrationTest extends AbstractIntegrationPostgresTe
         @DisplayName("Успешное удаление нескольких контестов по списку идентификаторов")
         void deleteMany_ShouldRemoveAllContests_WhenIdsProvided() {
             setSecurityContext(userAuthenticated);
-            Contest contestFirst = contestCommandService.createSingle(new CreationContestRqDto(exerciseExisting.getId()));
-            Contest contestSecond = contestCommandService.createSingle(new CreationContestRqDto(exerciseExisting.getId()));
+            Contest contestFirst = contestCommandService.createSingle(new CreationContestRqDto(exerciseExisting.getId(), Status.FINISHED));
+            Contest contestSecond = contestCommandService.createSingle(new CreationContestRqDto(exerciseExisting.getId(), Status.FINISHED));
             java.util.List<Long> idsToDelete = java.util.List.of(contestFirst.getId(), contestSecond.getId());
 
             contestCommandService.deleteMany(idsToDelete);

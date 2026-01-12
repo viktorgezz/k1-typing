@@ -17,7 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
-import ru.viktorgezz.k1_typing_backend.domain.contest.ContestRepo;
+import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestRepo;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.Exercise;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.repo.ExerciseRepo;

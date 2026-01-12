@@ -3,8 +3,8 @@ spring:
     name: k1-typing-backend
   datasource:
     url: jdbc:postgresql://localhost:5433/${POSTGRESQL_DB:-typing_db}
-    username: ${SPRING_DATASOURCE_USERNAME:-postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:-strong_password}
+    username: ${POSTGRESQL_USERNAME:postgres}
+    password: ${POSTGRESQL_PASSWORD:strong_password}
     driver-class-name: org.postgresql.Driver
   jpa:
     open-in-view: false
@@ -17,6 +17,12 @@ spring:
   jackson:
     deserialization:
       accept-empty-string-as-null-object: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:my_secure_password_123}
+      database: 0
 
 security:
   jwt:

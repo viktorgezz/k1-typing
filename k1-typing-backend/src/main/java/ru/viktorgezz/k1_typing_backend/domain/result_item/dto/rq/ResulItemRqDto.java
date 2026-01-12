@@ -21,8 +21,8 @@ public record ResulItemRqDto(
         @DecimalMax(value = "100.0", message = "Точность не может быть больше 100")
         BigDecimal accuracy,
 
-        @NotNull(message = "ID контеста не может быть null")
-        @Positive(message = "ID контеста должен быть положительным числом")
-        Long idContest
+        @NotNull(message = "ID упражнения не может быть null")
+        @Positive(message = "ID упражнения должен быть положительным числом")
+        Long idExercises
 ) {
 }

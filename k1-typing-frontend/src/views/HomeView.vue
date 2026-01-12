@@ -1,20 +1,41 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useExercisesStore } from '@/stores/exercises'
+import { useMultiplayerStore } from '@/stores/multiplayer'
 import ExerciseCard from '@/components/ExerciseCard.vue'
+import RoomCard from '@/components/RoomCard.vue'
+import CreateRoomModal from '@/components/CreateRoomModal.vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const exercisesStore = useExercisesStore()
+const multiplayerStore = useMultiplayerStore()
 
 // Активная вкладка
 const activeTab = ref('exercises')
 
-// Загрузка упражнений при монтировании
+// Модалка создания комнаты
+const showCreateRoomModal = ref(false)
+
+// Загрузка данных при монтировании
 onMounted(() => {
   exercisesStore.fetchExercises()
+
+  // Проверяем query параметр для активации нужной вкладки
+  if (route.query.tab === 'contests') {
+    activeTab.value = 'contests'
+    multiplayerStore.fetchRooms()
+  }
+})
+
+// Загрузка комнат при переключении на таб соревнований
+watch(activeTab, (newTab) => {
+  if (newTab === 'contests') {
+    multiplayerStore.fetchRooms()
+  }
 })
 
 // Обработка клика по упражнению
@@ -22,10 +43,44 @@ const handleExerciseClick = (exercise) => {
   router.push(`/exercise/${exercise.id}`)
 }
 
-// Генерация номеров страниц для пагинации
+// Обработка клика по комнате - переход в комнату
+const handleRoomClick = (room) => {
+  router.push(`/contest/${room.idContest}`)
+}
+
+// Обработка создания комнаты - переход в созданную комнату
+const handleRoomCreated = (roomData) => {
+  if (roomData?.idContest) {
+    router.push(`/contest/${roomData.idContest}`)
+  }
+}
+
+// Генерация номеров страниц для пагинации упражнений
 const pageNumbers = computed(() => {
   const total = exercisesStore.pagination.totalPages
   const current = exercisesStore.pagination.page
+  const pages = []
+
+  // Показываем максимум 5 страниц
+  let start = Math.max(0, current - 2)
+  let end = Math.min(total - 1, start + 4)
+
+  // Корректируем start если end близко к концу
+  if (end - start < 4) {
+    start = Math.max(0, end - 4)
+  }
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
+
+// Генерация номеров страниц для пагинации комнат
+const roomPageNumbers = computed(() => {
+  const total = multiplayerStore.pagination.totalPages
+  const current = multiplayerStore.pagination.page
   const pages = []
 
   // Показываем максимум 5 страниц
@@ -218,13 +273,146 @@ const pageNumbers = computed(() => {
 
       <!-- Контент соревнований -->
       <template v-else-if="activeTab === 'contests'">
-        <div class="contests-placeholder">
-          <div class="placeholder-icon">🏆</div>
-          <h2 class="placeholder-title">Сейчас соревнования никто не проводит</h2>
-          <p class="placeholder-text">Следите за обновлениями — скоро здесь появятся захватывающие соревнования!</p>
+        <div class="section-header">
+          <h1 class="page-title">Соревнования</h1>
+          <p class="page-subtitle">
+            Присоединяйтесь к соревнованиям или создайте свою комнату
+          </p>
         </div>
+
+        <!-- Кнопка создания комнаты -->
+        <div class="contests-actions">
+          <button
+            v-if="authStore.isAuthenticated"
+            class="btn-create-room"
+            @click="showCreateRoomModal = true"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Создать комнату
+          </button>
+          <p v-else class="create-room-hint">
+            <router-link to="/login" class="create-room-link">Войдите</router-link>
+            , чтобы создать комнату для соревнований
+          </p>
+        </div>
+
+        <!-- Состояние загрузки -->
+        <div v-if="multiplayerStore.loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>Загрузка комнат...</p>
+        </div>
+
+        <!-- Ошибка -->
+        <div v-else-if="multiplayerStore.error" class="error-state">
+          <div class="error-icon">⚠</div>
+          <p>{{ multiplayerStore.error }}</p>
+          <button class="btn btn-primary" @click="multiplayerStore.fetchRooms()">
+            Попробовать снова
+          </button>
+        </div>
+
+        <!-- Пустое состояние -->
+        <div v-else-if="!multiplayerStore.hasRooms" class="empty-state">
+          <div class="empty-icon">🏆</div>
+          <p>Сейчас нет доступных комнат</p>
+          <p class="empty-subtitle">Создайте свою комнату, чтобы начать соревнование!</p>
+        </div>
+
+        <!-- Сетка комнат -->
+        <div v-else class="rooms-grid">
+          <RoomCard
+            v-for="room in multiplayerStore.rooms"
+            :key="room.idContest"
+            :id-contest="room.idContest"
+            :title-exercise="room.titleExercise"
+            :language="room.language"
+            :current-players="room.currentPlayers"
+            :max-players="room.maxPlayers"
+            :created-at="room.createdAt"
+            @click="handleRoomClick(room)"
+          />
+        </div>
+
+        <!-- Пагинация комнат -->
+        <nav
+          v-if="multiplayerStore.pagination.totalPages > 1"
+          class="pagination"
+        >
+          <button
+            class="pagination-btn pagination-arrow"
+            :disabled="!multiplayerStore.hasPrevPage || multiplayerStore.loading"
+            @click="multiplayerStore.prevPage()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+
+          <div class="pagination-pages">
+            <button
+              v-for="pageNum in roomPageNumbers"
+              :key="pageNum"
+              class="pagination-btn"
+              :class="{ active: pageNum === multiplayerStore.pagination.page }"
+              :disabled="multiplayerStore.loading"
+              @click="multiplayerStore.goToPage(pageNum)"
+            >
+              {{ pageNum + 1 }}
+            </button>
+          </div>
+
+          <button
+            class="pagination-btn pagination-arrow"
+            :disabled="!multiplayerStore.hasNextPage || multiplayerStore.loading"
+            @click="multiplayerStore.nextPage()"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </nav>
+
+        <!-- Информация о пагинации комнат -->
+        <p v-if="multiplayerStore.hasRooms" class="pagination-info">
+          Показано {{ multiplayerStore.rooms.length }} из
+          {{ multiplayerStore.pagination.totalElements }} комнат
+        </p>
       </template>
     </main>
+
+    <!-- Модалка создания комнаты -->
+    <CreateRoomModal
+      :show="showCreateRoomModal"
+      @close="showCreateRoomModal = false"
+      @created="handleRoomCreated"
+    />
   </div>
 </template>
 
@@ -305,46 +493,71 @@ const pageNumbers = computed(() => {
   color: var(--coral);
 }
 
-/* Заглушка для соревнований */
-.contests-placeholder {
+/* Действия для соревнований */
+.contests-actions {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: 400px;
-  text-align: center;
-  padding: 60px 20px;
+  align-items: center;
+  margin-bottom: 40px;
 }
 
-.placeholder-icon {
-  font-size: 80px;
-  margin-bottom: 24px;
-  filter: grayscale(30%);
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.placeholder-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 12px;
-}
-
-.placeholder-text {
+.btn-create-room {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
   font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--coral) 0%, var(--lemon) 100%);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 160, 122, 0.35);
+  }
+
+.btn-create-room:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 160, 122, 0.45);
+}
+
+.btn-create-room svg {
+  width: 20px;
+  height: 20px;
+}
+
+.create-room-hint {
+  font-size: 15px;
   color: var(--text-secondary);
   margin: 0;
-  max-width: 400px;
-  line-height: 1.6;
+}
+
+.create-room-link {
+  color: var(--coral);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.create-room-link:hover {
+  color: var(--lemon);
+  text-decoration: underline;
+}
+
+/* Сетка комнат */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 48px;
+}
+
+.empty-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  opacity: 0.8;
 }
 
 .header-content {

@@ -7,7 +7,7 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false
   docker:
     compose:
       enabled: false
