@@ -1,5 +1,7 @@
 package ru.viktorgezz.k1_typing_backend.security.websocket;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -9,8 +11,9 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import ru.viktorgezz.k1_typing_backend.properties.CustomProperties;
 
-import lombok.RequiredArgsConstructor;
+import static java.lang.String.format;
 
 /**
  * Конфигурация WebSocket с поддержкой STOMP протокола.
@@ -20,6 +23,7 @@ import lombok.RequiredArgsConstructor;
  * - /topic/* - для broadcast сообщений (server → clients)
  * - /app/* - для сообщений от клиентов (client → server)
  */
+@Slf4j
 @Configuration
 @EnableWebSocketMessageBroker
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
@@ -27,37 +31,45 @@ import lombok.RequiredArgsConstructor;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketAuthChannelInterceptor authChannelInterceptor;
+    private final CustomProperties customProperties;
 
     @Override
     public void configureMessageBroker(@NonNull MessageBrokerRegistry config) {
         // Включаем простой брокер для подписок на /topic
         // Клиенты подписываются на /topic/contest/{idContest}/progress и т.д.
         config.enableSimpleBroker("/topic", "/queue");
-        
+
         // Префикс для сообщений от клиентов к серверу
         // Клиенты отправляют на /app/contest/{idContest}/progress
         config.setApplicationDestinationPrefixes("/app");
-        
+
         // Префикс для личных сообщений пользователю
         config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
+        final String hostFrontend = customProperties.getHostFrontend();
+
+        String frontendOriginPattern = format("http://%s:*", hostFrontend != null ? hostFrontend : "localhost");
+        log.debug("[WebSocket allowedOriginPattern: {}]", frontendOriginPattern);
+
         // Основной WebSocket endpoint
         // Клиенты подключаются к ws://host/ws/contest
         registry.addEndpoint("/ws/contest")
                 .setAllowedOriginPatterns(
-                    "http://localhost:*",
-                    "http://127.0.0.1:*"
+                        frontendOriginPattern,
+                        "http://localhost:*",
+                        "http://127.0.0.1:*"
                 )
                 .withSockJS(); // Fallback для браузеров без WebSocket поддержки
-        
+
         // Также добавляем endpoint без SockJS для нативных WebSocket клиентов
         registry.addEndpoint("/ws/contest")
                 .setAllowedOriginPatterns(
-                    "http://localhost:*",
-                    "http://127.0.0.1:*"
+                        frontendOriginPattern,
+                        "http://localhost:*",
+                        "http://127.0.0.1:*"
                 );
     }
 

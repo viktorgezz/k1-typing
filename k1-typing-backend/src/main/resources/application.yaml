@@ -2,7 +2,7 @@ spring:
   application:
     name: k1-typing-backend
   datasource:
-    url: jdbc:postgresql://localhost:5433/${POSTGRESQL_DB:-typing_db}
+    url: jdbc:postgresql://${POSTGRESQL_HOST:localhost}:${POSTGRESQL_PORT:5433}/${POSTGRESQL_DB:typing_db}
     username: ${POSTGRESQL_USERNAME:postgres}
     password: ${POSTGRESQL_PASSWORD:strong_password}
     driver-class-name: org.postgresql.Driver
@@ -13,7 +13,7 @@ spring:
     show-sql: true
   docker:
     compose:
-      enabled: true
+      enabled: false
   jackson:
     deserialization:
       accept-empty-string-as-null-object: true
@@ -26,9 +26,13 @@ spring:
 
 security:
   jwt:
-    access-expiration-ms: 600000
+    access-expiration-ms: 900000
     refresh-expiration-ms: 6000000
 
 logging:
   level:
     ru.viktorgezz.k1_typing_backend: DEBUG
+
+custom:
+  host-frontend: ${FRONTEND_HOST:http://localhost}
+  port-frontend: ${FRONTEND_PORT:5173}

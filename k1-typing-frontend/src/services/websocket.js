@@ -2,7 +2,7 @@ import { Client } from '@stomp/stompjs'
 import SockJS from 'sockjs-client/dist/sockjs'
 import { getAccessToken } from './tokenStorage'
 
-const WEBSOCKET_URL = 'http://localhost:8080/ws/contest'
+const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL || 'http://localhost:8080/ws/contest'
 
 /**
  * WebSocket сервис для мультиплеерных соревнований

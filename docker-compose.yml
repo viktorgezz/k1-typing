@@ -33,52 +33,50 @@ services:
       timeout: 5s
       retries: 5
 
-  db-sonar:
-    image: postgres:15
-    container_name: postgres_sonar_db
-    labels:
-      - "org.springframework.boot.ignore=true"
-    environment:
-      POSTGRES_USER: sonar
-      POSTGRES_PASSWORD: sonar_password
-      POSTGRES_DB: sonar
-    volumes:
-      - postgres-data-sonar:/var/lib/postgresql/data
-    networks:
-      - sonar-net
-
-  sonarqube:
-    image: sonarqube:10.7.0-community
-    container_name: sonarqube
-    labels:
-      - "org.springframework.boot.ignore=true"
-    depends_on:
-      db-sonar:
-        condition: service_started
+  k1-typing-backend:
+    build:
+      context: ./k1-typing-backend
+      dockerfile: Dockerfile
+    container_name: k1-typing-backend
     ports:
-      - "9000:9000"
+      - "8080:8080"
     environment:
-      SONAR_JDBC_URL: jdbc:postgresql://db-sonar:5432/sonar
-      SONAR_JDBC_USERNAME: sonar
-      SONAR_JDBC_PASSWORD: sonar_password
-      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-      - sonarqube_logs:/opt/sonarqube/logs
+      POSTGRESQL_HOST: ${POSTGRESQL_HOST:-db-typing}
+      POSTGRESQL_PORT: ${POSTGRESQL_PORT:-5432}
+      POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME}
+      POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRESQL_DB: ${POSTGRESQL_DB}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      FRONTEND_PORT: ${FRONTEND_PORT}
+    depends_on:
+      db-typing:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
-      - sonar-net
+      - back-net
+
+  k1-typing-frontend:
+    build:
+      context: ./k1-typing-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${BACKEND_URL:-http://localhost:8080}
+        VITE_WEBSOCKET_URL: ${BACKEND_URL:-http://localhost:8080}/ws/contest
+    container_name: k1-typing-frontend
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    networks:
+      - back-net
 
 networks:
   back-net:
-    driver: bridge
-  sonar-net:
     driver: bridge
 
 volumes:
   postgres-data-typing:
   postgres-data-sonar:
-  sonarqube_data:
-  sonarqube_extensions:
-  sonarqube_logs:
   redis-data:

@@ -3,6 +3,7 @@ package ru.viktorgezz.k1_typing_backend.security;
 import java.util.Arrays;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,11 +31,15 @@ import ru.viktorgezz.k1_typing_backend.domain.user.User;
 import ru.viktorgezz.k1_typing_backend.domain.user.repo.UserRepo;
 import ru.viktorgezz.k1_typing_backend.exception.BusinessException;
 import ru.viktorgezz.k1_typing_backend.exception.ErrorCode;
+import ru.viktorgezz.k1_typing_backend.properties.CustomProperties;
 import ru.viktorgezz.k1_typing_backend.security.service.JwtService;
+
+import static java.lang.String.format;
 
 /**
  * Конфигурация безопасности Spring Security для приложения.
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -60,6 +65,7 @@ public class SecurityConfig {
 
     private final JwtService jwtService;
     private final UserRepo userRepo;
+    private final CustomProperties customProperties;
 
     @Bean
     public SecurityFilterChain filterChain(
@@ -104,8 +110,10 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        final String hostAndPortFrontend = format("http://%s:%s", customProperties.getHostFrontend(), customProperties.getPortFrontend());
+        log.debug("[allowedOrigin: {}]", hostAndPortFrontend);
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:80", "http://localhost", "http://localhost:8080", "http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(hostAndPortFrontend, "http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));
