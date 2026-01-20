@@ -9,7 +9,7 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - postgres-data-typing:/var/lib/postgresql/data
+      - postgres-data-typing:/var/lib/postgresql
     networks:
       - back-net
     healthcheck:
@@ -50,7 +50,7 @@ services:
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       FRONTEND_HOST: ${FRONTEND_HOST}
-      FRONTEND_PORT: ${FRONTEND_PORT}
+      FRONTEND_PORT: ${FRONTEND_PORT_SECURITY}
     depends_on:
       db-typing:
         condition: service_healthy
@@ -65,10 +65,10 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: ${BACKEND_URL:-http://localhost:8080}
-        VITE_WEBSOCKET_URL: ${BACKEND_URL:-http://localhost:8080}/ws/contest
+        VITE_WEBSOCKET_URL: ${WEBSOCKET_URL:-}
     container_name: k1-typing-frontend
     ports:
-      - "${FRONTEND_PORT:-5173}:5173"
+      - "${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}"
     networks:
       - back-net
 

@@ -1,7 +1,7 @@
 package ru.viktorgezz.k1_typing_backend.security.websocket;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.lang.String.format;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -11,9 +11,10 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-import ru.viktorgezz.k1_typing_backend.properties.CustomProperties;
 
-import static java.lang.String.format;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import ru.viktorgezz.k1_typing_backend.properties.CustomProperties;
 
 /**
  * Конфигурация WebSocket с поддержкой STOMP протокола.
@@ -51,14 +52,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
         final String hostFrontend = customProperties.getHostFrontend();
 
-        String frontendOriginPattern = format("http://%s:*", hostFrontend != null ? hostFrontend : "localhost");
-        log.debug("[WebSocket allowedOriginPattern: {}]", frontendOriginPattern);
+        String urlFrontend = format("%s:*", hostFrontend);
+        log.debug("[WebSocket allowedOriginPattern: {}]", urlFrontend);
 
         // Основной WebSocket endpoint
         // Клиенты подключаются к ws://host/ws/contest
         registry.addEndpoint("/ws/contest")
                 .setAllowedOriginPatterns(
-                        frontendOriginPattern,
+                        urlFrontend,
                         "http://localhost:*",
                         "http://127.0.0.1:*"
                 )
@@ -67,7 +68,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Также добавляем endpoint без SockJS для нативных WebSocket клиентов
         registry.addEndpoint("/ws/contest")
                 .setAllowedOriginPatterns(
-                        frontendOriginPattern,
+                        urlFrontend,
                         "http://localhost:*",
                         "http://127.0.0.1:*"
                 );

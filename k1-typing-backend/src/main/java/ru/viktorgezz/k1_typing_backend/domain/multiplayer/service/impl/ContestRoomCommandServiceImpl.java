@@ -104,7 +104,10 @@ public class ContestRoomCommandServiceImpl implements ContestRoomCommandService 
     }
 
     private Contest checkRoomForNewParticipant(Long idContest) {
-        if (!roomService.roomExists(idContest)) {
+        if (!isRoomExistsRedis(idContest)) {
+            if (contestQueryService.hasOldContest(idContest)) {
+                contestCommandService.delete(idContest);
+            }
             throw new BusinessException(ErrorCode.ROOM_NOT_FOUND, idContest.toString());
         }
 
@@ -120,5 +123,9 @@ public class ContestRoomCommandServiceImpl implements ContestRoomCommandService 
         }
 
         return contest;
+    }
+
+    private boolean isRoomExistsRedis(Long idContest) {
+        return roomService.roomExists(idContest);
     }
 }

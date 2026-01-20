@@ -11,5 +11,7 @@ public interface ContestQueryService {
 
     Contest getOneWithExercise(Long id);
 
+    boolean hasOldContest(Long id);
+
     Page<Contest> findByAmountGreaterThanAndStatus(Integer amount, Status status, Pageable pageable);
 }

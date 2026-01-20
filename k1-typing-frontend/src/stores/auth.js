@@ -19,7 +19,8 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref(null)
 
   // Getters
-  const isAuthenticated = computed(() => hasValidTokens())
+  // Делаем зависимым от реактивного user, чтобы флаг обновлялся без перезагрузки
+  const isAuthenticated = computed(() => !!user.value && hasValidTokens())
 
   const username = computed(() => user.value?.username || null)
 

@@ -1,0 +1,42 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Execute remote ssh commands using key
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          # Тайм-аут на случай, если сборка долгая
+          command_timeout: 30m
+          script: |
+            # ИСПРАВЛЕНИЕ 2: Путь теперь ведет в домашнюю папку пользователя deployer
+            cd /home/deployer/k1-typing
+            
+            # Стандартные команды обновления
+            echo "📥 Pulling latest changes..."
+            git fetch --all
+            git reset --hard origin/main
+            
+            echo "🛑 Stopping services..."
+            docker-compose down
+            
+            # Удаляем остановленные контейнеры, чтобы не было конфликтов имен
+            docker-compose rm -f
+            
+            echo "🚀 Building and starting services..."
+            # Благодаря группе docker (шаг 1.2), sudo здесь больше не нужен
+            docker-compose up -d --build
+            
+            echo "🧹 Cleaning up..."
+            docker image prune -f

@@ -10,8 +10,11 @@ import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
 import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestPagingAndSortingRepo;
 import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestRepo;
 import ru.viktorgezz.k1_typing_backend.domain.contest.service.intrf.ContestQueryService;
+import ru.viktorgezz.k1_typing_backend.domain.multiplayer.redis.utility.RedisKeyGenerator;
 import ru.viktorgezz.k1_typing_backend.exception.BusinessException;
 import ru.viktorgezz.k1_typing_backend.exception.ErrorCode;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,13 @@ public class ContestQueryServiceImpl implements ContestQueryService {
         return contestRepo.findContestWithExercise(id).orElseThrow(
                 () -> new BusinessException(ErrorCode.CONTEST_NOT_FOUND, String.valueOf(id))
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasOldContest(Long id) {
+        return contestRepo.existsByIdAndCreatedAtBefore(id, LocalDateTime.now()
+                .minusMinutes(RedisKeyGenerator.TTL_ROOM.toMinutes()));
     }
 
     @Override

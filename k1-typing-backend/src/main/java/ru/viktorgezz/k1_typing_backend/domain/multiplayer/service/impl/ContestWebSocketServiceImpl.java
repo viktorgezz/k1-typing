@@ -144,9 +144,10 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
         readyService.markReady(idContest, idUser);
 
         final int countParticipants = participantsService.getParticipantsCount(idContest);
+        final int countParticipantsMax = roomService.getParticipantsMax(idContest);
         final int countReady = readyService.getReadyCount(idContest);
 
-        log.debug("Contest {}: {}/{} participants ready", idContest, countReady, countParticipants);
+        log.debug("Contest {}: {}/{} participants ready. Max: {}", idContest, countReady, countParticipants, countParticipantsMax);
 
         // Отправляем broadcast о готовности игрока
         messagingTemplate.convertAndSend(
@@ -154,7 +155,7 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
                 new PlayerReadyMessage(idUser, countReady, countParticipants)
         );
 
-        if (countReady >= MIN_COUNT_PARTICIPANTS && countParticipants >= MIN_COUNT_PARTICIPANTS) {
+        if (countReady >= ((countParticipantsMax + 1) / 2) && countParticipants >= MIN_COUNT_PARTICIPANTS) {
             Contest contest = contestQueryService.getOne(idContest);
             contest.setStatus(Status.WAITING);
             contestCommandService.save(contest);

@@ -1,10 +1,12 @@
 package ru.viktorgezz.k1_typing_backend.domain.contest.repo;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.lang.NonNull;
 
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
 
@@ -12,5 +14,10 @@ public interface ContestRepo extends CrudRepository<Contest, Long> {
 
     @EntityGraph(attributePaths = {"exercise"})
     @Query("SELECT c FROM Contest c WHERE c.id = :id")
-    Optional<Contest> findContestWithExercise(Long id);
+    Optional<Contest> findContestWithExercise(@NonNull Long id);
+
+    @Query("SELECT COUNT(c) > 0 FROM Contest c " +
+           "WHERE c.id = :id AND c.createdAt <= :createdBefore")
+    boolean existsByIdAndCreatedAtBefore(@NonNull Long id, @NonNull LocalDateTime createdBefore);
+
 }
