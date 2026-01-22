@@ -28,9 +28,9 @@ public class TokenRefreshCleanupService implements CleanupService {
     private long purgeExpiredTokens() {
         try {
             Date now = new Date();
-            int deletedCount = refreshTokenRepo.deleteExpiredTokens(now);
-            log.debug("Purged {} expired tokens at {}", deletedCount, now);
-            return deletedCount;
+            int countDeleted = refreshTokenRepo.deleteExpiredTokens(now);
+            log.debug("Purged {} expired tokens at {}", countDeleted, now);
+            return countDeleted;
         } catch (Exception e) {
             log.error("Error purging expired tokens {}", e.getMessage(), e);
             return 0;

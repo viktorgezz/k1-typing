@@ -3,6 +3,7 @@ package ru.viktorgezz.k1_typing_backend.auth.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,12 +45,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest authRq) {
-        final Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRq.name(),
-                        authRq.password()
-                )
-        );
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRq.name(),
+                            authRq.password()
+                    )
+            );
+        } catch (InternalAuthenticationServiceException e) {
+            throw new BusinessException(ErrorCode.BAD_CREDENTIALS);
+        }
 
         final User user = (User) authentication.getPrincipal();
         final String accessToken = jwtService.generateAccessToken(user.getUsername());

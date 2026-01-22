@@ -309,6 +309,9 @@ const handleClose = () => {
   transition: all 0.3s ease;
   outline: none;
   cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .form-select:focus {
@@ -320,6 +323,45 @@ const handleClose = () => {
 .form-select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Стили для option элементов - явно задаем цвета для кроссбраузерной совместимости */
+.form-select option {
+  background-color: #f5f5f5 !important;
+  color: #333333 !important;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* Стили для выбранного option (при наведении в выпадающем списке) */
+.form-select option:checked,
+.form-select option:hover,
+.form-select option:focus {
+  background-color: #4A90E2 !important;
+  color: #ffffff !important;
+}
+
+/* Стили для disabled option */
+.form-select option:disabled {
+  background-color: #e0e0e0 !important;
+  color: #999999 !important;
+}
+
+/* Дополнительные стили для лучшей совместимости в разных браузерах */
+.form-select::-ms-expand {
+  display: none; /* Скрываем стрелку в IE/Edge */
+}
+
+/* Для WebKit браузеров (Chrome, Safari) */
+.form-select::-webkit-select-placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Убеждаемся, что цвет текста в select всегда белый */
+.form-select,
+.form-select:focus,
+.form-select:active {
+  color: var(--text-light) !important;
 }
 
 .loading-exercises {

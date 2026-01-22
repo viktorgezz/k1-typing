@@ -60,6 +60,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws/contest")
                 .setAllowedOriginPatterns(
                         urlFrontend,
+                        customProperties.getHostFrontend(),
                         "http://localhost:*",
                         "http://127.0.0.1:*"
                 )
@@ -69,6 +70,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/ws/contest")
                 .setAllowedOriginPatterns(
                         urlFrontend,
+                        customProperties.getHostFrontend(),
                         "http://localhost:*",
                         "http://127.0.0.1:*"
                 );

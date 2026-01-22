@@ -1,10 +1,7 @@
 package ru.viktorgezz.k1_typing_backend.security;
 
-import static java.lang.String.format;
-
-import java.util.Arrays;
-import java.util.List;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -25,9 +22,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.viktorgezz.k1_typing_backend.domain.user.Role;
 import ru.viktorgezz.k1_typing_backend.domain.user.User;
 import ru.viktorgezz.k1_typing_backend.domain.user.repo.UserRepo;
@@ -35,6 +29,11 @@ import ru.viktorgezz.k1_typing_backend.exception.BusinessException;
 import ru.viktorgezz.k1_typing_backend.exception.ErrorCode;
 import ru.viktorgezz.k1_typing_backend.properties.CustomProperties;
 import ru.viktorgezz.k1_typing_backend.security.service.JwtService;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static java.lang.String.format;
 
 /**
  * Конфигурация безопасности Spring Security для приложения.
@@ -51,6 +50,7 @@ public class SecurityConfig {
             "/auth/register",
             "/auth/refresh",
             "/ui/auth/**",
+            "/monitoring/**"
     };
 
     /**
@@ -60,7 +60,7 @@ public class SecurityConfig {
     private static final String[] WEBSOCKET_URLS = {
             "/ws/**",
             "/ws/contest/**",
-            "/ws/contest",
+            "/ws/contest"
     };
 
     private final JwtService jwtService;
@@ -71,7 +71,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(
             final HttpSecurity http,
             JwtAuthenticationFilter jwtAuthenticationFilter
-            )
+    )
             throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -114,7 +114,7 @@ public class SecurityConfig {
         log.debug("[allowedOrigin: {}]", urlFrontend);
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(urlFrontend, "http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(urlFrontend, customProperties.getHostFrontend(), "http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "DELETE", "PATCH", "PUT", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setExposedHeaders(List.of("Authorization"));

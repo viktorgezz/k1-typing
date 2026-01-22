@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ErrorCode {
 
-    USER_NOT_FOUND(Constants.NOT_FOUND, "User with username: %s - not found", HttpStatus.NOT_FOUND),
     EXERCISE_NOT_FOUND(Constants.NOT_FOUND, "Exercise - not found", HttpStatus.NOT_FOUND),
     CONTEST_NOT_FOUND(Constants.NOT_FOUND, "Contest with id: %s - not found ", HttpStatus.NOT_FOUND),
     CONTEST_ALREADY_STARTED("CONTEST_ALREADY_STARTED", "Contest with id: %s - already started", HttpStatus.BAD_REQUEST),

@@ -51,6 +51,8 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       FRONTEND_HOST: ${FRONTEND_HOST}
       FRONTEND_PORT: ${FRONTEND_PORT_SECURITY}
+      JAVAMELODY_LOGIN: ${JAVAMELODY_LOGIN}
+      JAVAMELODY_PASSWORD: ${JAVAMELODY_PASSWORD}
     depends_on:
       db-typing:
         condition: service_healthy

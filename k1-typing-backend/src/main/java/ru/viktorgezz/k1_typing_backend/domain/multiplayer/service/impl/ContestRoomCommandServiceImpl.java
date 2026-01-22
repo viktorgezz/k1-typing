@@ -1,13 +1,9 @@
 package ru.viktorgezz.k1_typing_backend.domain.multiplayer.service.impl;
 
-import static ru.viktorgezz.k1_typing_backend.security.util.CurrentUserUtils.getCurrentUser;
-
-import java.util.List;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import lombok.RequiredArgsConstructor;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
 import ru.viktorgezz.k1_typing_backend.domain.contest.service.intrf.ContestCommandService;
@@ -26,7 +22,13 @@ import ru.viktorgezz.k1_typing_backend.domain.user.User;
 import ru.viktorgezz.k1_typing_backend.exception.BusinessException;
 import ru.viktorgezz.k1_typing_backend.exception.ErrorCode;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import static ru.viktorgezz.k1_typing_backend.security.util.CurrentUserUtils.getCurrentUser;
+
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ContestRoomCommandServiceImpl implements ContestRoomCommandService {
 
@@ -106,7 +108,12 @@ public class ContestRoomCommandServiceImpl implements ContestRoomCommandService 
     private Contest checkRoomForNewParticipant(Long idContest) {
         if (!isRoomExistsRedis(idContest)) {
             if (contestQueryService.hasOldContest(idContest)) {
-                contestCommandService.delete(idContest);
+                CompletableFuture.runAsync(() ->
+                                contestCommandService.deletePropagationRequiresNew(idContest))
+                        .exceptionally(ex -> {
+                            log.error("Async cleanup failed for contest {}: {}", idContest, ex.getMessage());
+                            return null;
+                        });
             }
             throw new BusinessException(ErrorCode.ROOM_NOT_FOUND, idContest.toString());
         }

@@ -29,6 +29,11 @@ security:
     access-expiration-ms: 900000
     refresh-expiration-ms: 6000000
 
+javamelody:
+  report-url: /monitoring
+  init-parameters:
+    authorized-users: ${JAVAMELODY_LOGIN:login}:${JAVAMELODY_PASSWORD:password}
+
 logging:
   level:
     ru.viktorgezz.k1_typing_backend: DEBUG

@@ -2,10 +2,12 @@ package ru.viktorgezz.k1_typing_backend.domain.contest.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
-import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestRepo;
+import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
 import ru.viktorgezz.k1_typing_backend.domain.contest.dto.rq.CreationContestRqDto;
+import ru.viktorgezz.k1_typing_backend.domain.contest.repo.ContestRepo;
 import ru.viktorgezz.k1_typing_backend.domain.contest.service.intrf.ContestCommandService;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.Exercise;
 import ru.viktorgezz.k1_typing_backend.domain.exercises.service.intrf.ExerciseQueryService;
@@ -13,6 +15,7 @@ import ru.viktorgezz.k1_typing_backend.domain.participant.Participants;
 import ru.viktorgezz.k1_typing_backend.domain.participant.ParticipantsCommandService;
 import ru.viktorgezz.k1_typing_backend.domain.user.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static ru.viktorgezz.k1_typing_backend.security.util.CurrentUserUtils.getCurrentUser;
@@ -63,6 +66,18 @@ public class ContestCommandServiceImpl implements ContestCommandService {
             contestRepo.delete(contest);
         }
         return contest;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deletePropagationRequiresNew(Long id) {
+        contestRepo.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public long deleteOldContestsByStatus(LocalDateTime createdBefore, Status status) {
+        return contestRepo.deleteOldContestsByStatus(createdBefore, status);
     }
 
     @Override

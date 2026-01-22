@@ -225,15 +225,13 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
         return new ContestFinishedMessage(buildLeaderboard(idContest));
     }
 
-    // Собирает лидерборд: маппит результаты из БД с именами участников из Redis
+    // Собирает лидерборд: маппит результаты из БД
     private List<ContestFinishedMessage.LeaderboardEntry> buildLeaderboard(Long idContest) {
-        Map<Long, String> participantNames = participantsService.getParticipantNames(idContest);
-
         return resultItemQueryService.findAllByContest(idContest)
                 .stream()
                 .map(result -> new ContestFinishedMessage.LeaderboardEntry(
                         result.getUser().getId(),
-                        participantNames.getOrDefault(result.getUser().getId(), "Unknown"),
+                        result.getUser().getUsername(),
                         result.getPlace(),
                         result.getDurationSeconds(),
                         result.getSpeed(),
