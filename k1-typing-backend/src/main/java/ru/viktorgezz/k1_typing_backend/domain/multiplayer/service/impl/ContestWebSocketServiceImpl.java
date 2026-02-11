@@ -7,6 +7,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
+import ru.viktorgezz.k1_typing_backend.domain.balance.service.BalanceService;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Contest;
 import ru.viktorgezz.k1_typing_backend.domain.contest.Status;
 import ru.viktorgezz.k1_typing_backend.domain.contest.service.intrf.ContestCommandService;
@@ -43,6 +44,7 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
     private final ReadyService readyService;
     private final RoomService roomService;
     private final FinishService finishService;
+    private final BalanceService balanceService;
 
     private final ContestQueryService contestQueryService;
     private final ContestCommandService contestCommandService;
@@ -62,6 +64,7 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
             ReadyService readyService,
             RoomService roomService,
             FinishService finishService,
+            BalanceService balanceService,
             ContestQueryService contestQueryService,
             ContestCommandService contestCommandService,
             ResultItemCommandService resultItemCommandService,
@@ -75,6 +78,7 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
         this.readyService = readyService;
         this.roomService = roomService;
         this.finishService = finishService;
+        this.balanceService = balanceService;
         this.contestQueryService = contestQueryService;
         this.contestCommandService = contestCommandService;
         this.resultItemCommandService = resultItemCommandService;
@@ -126,6 +130,8 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
                         placeObtained
                 )
         );
+
+        balanceService.replenishBalanceByIdUserAndPlaceAsync(idUser, placeObtained);
 
         return new PlayerFinishedMessage(
                 idUser,

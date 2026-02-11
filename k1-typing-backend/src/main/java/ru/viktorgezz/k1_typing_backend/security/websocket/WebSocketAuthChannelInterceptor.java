@@ -1,8 +1,9 @@
 package ru.viktorgezz.k1_typing_backend.security.websocket;
 
-import java.util.List;
-
-import org.springframework.lang.NonNull;
+import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -14,12 +15,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import ru.viktorgezz.k1_typing_backend.security.exception.InvalidJwtTokenException;
 import ru.viktorgezz.k1_typing_backend.security.exception.TokenExpiredException;
 import ru.viktorgezz.k1_typing_backend.security.service.JwtService;
+
+import java.util.List;
 
 /**
  * Интерцептор для аутентификации WebSocket соединений по JWT.
@@ -41,13 +41,17 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
     private final UserDetailsService userDetailsService;
 
     @Override
-    public Message<?> preSend(
-            @NonNull Message<?> message,
-            @NonNull MessageChannel channel
+    public Message<@NotNull ?> preSend(
+            @Nullable Message<?> message,
+            @Nullable MessageChannel channel
     ) {
+        if (message == null) {
+            return null;
+        }
+
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(
-            message, 
-            StompHeaderAccessor.class
+                message,
+                StompHeaderAccessor.class
         );
 
         if (accessor == null) {
@@ -77,16 +81,16 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtService.validateToken(token, userDetails.getUsername())) {
-                    UsernamePasswordAuthenticationToken authentication = 
-                        new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                        );
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
                     // Устанавливаем аутентификацию в WebSocket сессию
                     accessor.setUser(authentication);
-                    
+
                     // Также устанавливаем в SecurityContext для текущего потока
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -113,14 +117,14 @@ public class WebSocketAuthChannelInterceptor implements ChannelInterceptor {
     private String extractToken(StompHeaderAccessor accessor) {
         // Пробуем получить из нативных STOMP заголовков
         List<String> authHeaders = accessor.getNativeHeader(AUTHORIZATION_HEADER);
-        
+
         if (authHeaders != null && !authHeaders.isEmpty()) {
             String authHeader = authHeaders.getFirst();
-            
+
             if (authHeader.startsWith(BEARER_PREFIX)) {
                 return authHeader.substring(BEARER_PREFIX.length());
             }
-            
+
             // Если токен передан без Bearer prefix
             return authHeader;
         }

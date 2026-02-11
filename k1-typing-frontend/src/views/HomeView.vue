@@ -2,15 +2,18 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useBalanceStore } from '@/stores/balance'
 import { useExercisesStore } from '@/stores/exercises'
 import { useMultiplayerStore } from '@/stores/multiplayer'
 import ExerciseCard from '@/components/ExerciseCard.vue'
 import RoomCard from '@/components/RoomCard.vue'
 import CreateRoomModal from '@/components/CreateRoomModal.vue'
+import BalanceDisplay from '@/components/BalanceDisplay.vue'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const balanceStore = useBalanceStore()
 const exercisesStore = useExercisesStore()
 const multiplayerStore = useMultiplayerStore()
 
@@ -113,6 +116,7 @@ const roomPageNumbers = computed(() => {
         <div class="user-section">
           <!-- Для авторизованных пользователей -->
           <template v-if="authStore.isAuthenticated">
+            <BalanceDisplay :balance="balanceStore.userBalance" />
             <router-link to="/profile" class="user-greeting user-greeting-link">
               Привет, <strong>{{ authStore.username || 'Пользователь' }}</strong>
             </router-link>

@@ -182,6 +182,17 @@ const placeEmoji = {
   THIRD: '🥉',
   WITHOUT_PLACE: '',
 }
+
+// Награда монетами за место
+const getCoinReward = (place) => {
+  const rewards = {
+    FIRST: 3,
+    SECOND: 2,
+    THIRD: 1,
+  }
+  return rewards[place] || 0
+}
+
 </script>
 
 <template>
@@ -384,6 +395,14 @@ const placeEmoji = {
                   </span>
                 </div>
 
+                <!-- Награда монетами -->
+                <div v-if="getCoinReward(contestStore.myPlace) > 0" class="coin-reward">
+                  <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                  <span class="coin-amount">+{{ getCoinReward(contestStore.myPlace) }}</span>
+                </div>
+
                 <!-- Статистика -->
                 <div class="early-finish-stats">
                   <div class="early-stat">
@@ -436,6 +455,14 @@ const placeEmoji = {
               </span>
             </div>
 
+            <!-- Награда монетами -->
+            <div v-if="getCoinReward(contestStore.myPlace) > 0" class="coin-reward coin-reward-large">
+              <svg class="coin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10"/>
+              </svg>
+              <span class="coin-amount">+{{ getCoinReward(contestStore.myPlace) }}</span>
+            </div>
+
             <!-- Мои статы -->
             <div class="my-stats">
               <div class="my-stat">
@@ -475,6 +502,12 @@ const placeEmoji = {
                   <div class="entry-stats">
                     <span>{{ entry.speed }} сим/мин</span>
                     <span class="entry-accuracy">{{ entry.accuracy.toFixed(1) }}%</span>
+                    <span v-if="getCoinReward(entry.place) > 0" class="entry-coins">
+                      <svg class="coin-icon-small" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10"/>
+                      </svg>
+                      +{{ getCoinReward(entry.place) }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1134,6 +1167,87 @@ const placeEmoji = {
 
 .entry-accuracy {
   color: var(--lemon);
+}
+
+/* Стили для наград монетами */
+.coin-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 193, 7, 0.15) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 12px;
+  margin: 16px auto;
+  max-width: 160px;
+  animation: coin-appear 0.4s ease-out;
+}
+
+.coin-reward-large {
+  padding: 12px 24px;
+  max-width: 200px;
+  margin: 20px auto;
+}
+
+.coin-icon {
+  width: 24px;
+  height: 24px;
+  color: #ffd700;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.6));
+  animation: coin-spin 2s ease-in-out infinite;
+}
+
+.coin-reward-large .coin-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.coin-amount {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffd700;
+  text-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.coin-reward-large .coin-amount {
+  font-size: 22px;
+}
+
+@keyframes coin-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes coin-spin {
+  0%, 100% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(180deg);
+  }
+}
+
+.entry-coins {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #ffd700;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.coin-icon-small {
+  width: 14px;
+  height: 14px;
+  color: #ffd700;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
 }
 
 .results-actions {

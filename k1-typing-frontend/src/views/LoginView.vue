@@ -2,12 +2,14 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useBalanceStore } from '@/stores/balance'
 import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
 import GlassCard from '@/components/GlassCard.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const balanceStore = useBalanceStore()
 
 const errorMessage = ref('')
 
@@ -39,6 +41,8 @@ const onSubmit = handleSubmit(async (values) => {
   const result = await authStore.login(values)
 
   if (result.success) {
+    // Загружаем баланс после успешного входа
+    await balanceStore.fetchBalance()
     // Перенаправляем на главную страницу после успешного входа
     await router.push('/')
   } else {

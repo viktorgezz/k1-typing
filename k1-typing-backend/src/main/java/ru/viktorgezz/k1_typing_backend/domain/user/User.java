@@ -39,6 +39,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @Column
+    private Long balance = 1L;
+
     @OneToMany(
             mappedBy = "user",
             cascade = CascadeType.ALL,

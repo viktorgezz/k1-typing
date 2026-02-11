@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useBalanceStore } from '@/stores/balance'
 import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
 import GlassCard from '@/components/GlassCard.vue'
@@ -9,6 +10,7 @@ import { userAPI } from '@/api/user'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const balanceStore = useBalanceStore()
 
 // Состояния
 const loading = ref(true)
@@ -106,6 +108,7 @@ const handleLogout = async () => {
   const result = await authStore.logout()
   
   if (result.success) {
+    balanceStore.resetBalance()
     router.push('/login')
   }
   isLoggingOut.value = false

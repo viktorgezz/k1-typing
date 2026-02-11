@@ -31,6 +31,7 @@ public class ContentCleanupServiceImpl implements CleanupService {
             LocalDateTime now = LocalDateTime.now();
             long countDeleted = contestCommandService.deleteOldContestsByStatus(now
                     .minusMinutes(RedisKeyGenerator.TTL_ROOM.toMinutes()), Status.CREATED);
+            log.debug("Now: {}, create: {}", now, now.minusMinutes(RedisKeyGenerator.TTL_ROOM.toMinutes()));
             log.debug("Purge {} old contest at {}", countDeleted, now);
             return countDeleted;
         } catch (Exception e) {

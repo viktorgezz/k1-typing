@@ -78,26 +78,26 @@ defineEmits(['click'])
 
 .exercise-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 25px 50px -12px rgba(74, 55, 40, 0.35);
+  box-shadow:
+    0 25px 50px -12px rgba(74, 55, 40, 0.5),
+    0 0 30px rgba(255, 160, 122, 0.15);
 }
 
-/* Жидкое стекло эффект */
+/* Жидкое стекло — тёмный стиль как у формы логина */
 .liquid-glass {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.25) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 184, 140, 0.15) 100%
-  );
-  backdrop-filter: blur(16px) saturate(200%);
-  -webkit-backdrop-filter: blur(16px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(74, 55, 40, 0.666);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 20px;
+  box-shadow:
+    0 8px 32px rgba(74, 55, 40, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Блик на стекле */
+/* Блик — всегда плавно скользит */
 .glass-shine {
   position: absolute;
   top: -50%;
@@ -107,18 +107,13 @@ defineEmits(['click'])
   background: linear-gradient(
     45deg,
     transparent 40%,
-    rgba(255, 255, 255, 0.25) 45%,
-    rgba(255, 255, 255, 0.4) 50%,
-    rgba(255, 255, 255, 0.25) 55%,
+    rgba(255, 255, 255, 0.08) 45%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.08) 55%,
     transparent 60%
   );
-  transform: rotate(45deg);
-  transition: all 0.6s ease;
+  animation: shine 15s ease-in-out infinite;
   pointer-events: none;
-}
-
-.exercise-card:hover .glass-shine {
-  animation: shine 1.5s ease forwards;
 }
 
 @keyframes shine {
@@ -136,10 +131,10 @@ defineEmits(['click'])
   inset: 0;
   background: radial-gradient(
     ellipse at 30% 0%,
-    rgba(255, 224, 195, 0.2) 0%,
+    rgba(255, 200, 160, 0.1) 0%,
     transparent 50%
   );
-  opacity: 0.8;
+  opacity: 0.6;
   pointer-events: none;
 }
 
@@ -174,7 +169,7 @@ defineEmits(['click'])
 .card-title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #fff;
   margin: 0 0 auto;
   line-height: 1.4;
   display: -webkit-box;
@@ -186,7 +181,7 @@ defineEmits(['click'])
 .card-footer {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid rgba(74, 55, 40, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .card-author {
@@ -194,7 +189,7 @@ defineEmits(['click'])
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
 }
 
@@ -210,7 +205,7 @@ defineEmits(['click'])
   inset: 0;
   background: radial-gradient(
     circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 184, 140, 0.15) 0%,
+    rgba(255, 184, 140, 0.1) 0%,
     transparent 50%
   );
   opacity: 0;
