@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: k1-typing-backend
+  datasource:
+    url: jdbc:postgresql://${POSTGRESQL_HOST:localhost}:${POSTGRESQL_PORT:5433}/${POSTGRESQL_DB:typing_db}
+    username: ${POSTGRESQL_USERNAME:postgres}
+    password: ${POSTGRESQL_PASSWORD:strong_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  jackson:
+    deserialization:
+      accept-empty-string-as-null-object: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:my_secure_password_123}
+      database: 0
+
+security:
+  jwt:
+    access-expiration-ms: 900000
+    refresh-expiration-ms: 6000000
+
+javamelody:
+  report-url: /monitoring
+  init-parameters:
+    authorized-users: ${JAVAMELODY_LOGIN:login}:${JAVAMELODY_PASSWORD:password}
+
+logging:
+  level:
+    ru.viktorgezz.coretyping: DEBUG
+
+custom:
+  host-frontend: ${FRONTEND_HOST:http://localhost}
+  port-frontend: ${FRONTEND_PORT:5173}
