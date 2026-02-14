@@ -38,3 +38,4 @@ logging:
 custom:
   host-frontend: ${FRONTEND_HOST:http://localhost}
   port-frontend: ${FRONTEND_PORT:5173}
+  pollinations-tokens: ${POLLINATIONS_TOKENS}

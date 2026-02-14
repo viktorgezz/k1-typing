@@ -28,8 +28,6 @@ public class ContestWebSocketHandler {
             Principal principal
     ) {
         Long idUser = getUserFromPrincipal(principal).getId();
-        log.debug("Progress update: contest={}, user={}, progress={}%",
-                idContest, idUser, message.progress());
 
         contestWebSocketService.processProgress(idContest, idUser, message);
     }

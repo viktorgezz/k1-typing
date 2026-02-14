@@ -1,4 +1,4 @@
-package ru.viktorgezz.avatarmodule.service;
+package ru.viktorgezz.avatarmodule.service.intrf;
 
 import ru.viktorgezz.avatarmodule.dto.AvatarProfileRsDto;
 import ru.viktorgezz.avatarmodule.dto.ParticipantAvatarRsDto;

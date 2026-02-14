@@ -29,4 +29,10 @@ public class Avatar {
 
     @Column(name = "content_type", nullable = false)
     private String contentType;
+
+    public Avatar(Long idUser, byte[] photo, String contentType) {
+        this.idUser = idUser;
+        this.photo = photo;
+        this.contentType = contentType;
+    }
 }

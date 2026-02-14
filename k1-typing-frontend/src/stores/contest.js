@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { multiplayerAPI } from '@/api/multiplayer'
+import { avatarAPI } from '@/api/avatar'
 import { contestWebSocket } from '@/services/websocket'
 
 /**
@@ -128,6 +129,9 @@ export const useContestStore = defineStore('contest', () => {
       // Подключаемся к WebSocket
       await connectWebSocket()
 
+      // Загружаем аватарки участников (не блокируем основной поток)
+      fetchParticipantAvatars()
+
       return { success: true }
     } catch (err) {
       error.value = err.response?.data?.message || err.message || 'Ошибка подключения к комнате'
@@ -160,6 +164,9 @@ export const useContestStore = defineStore('contest', () => {
 
       // Подключаемся к WebSocket
       await connectWebSocket()
+
+      // Загружаем аватарки участников (не блокируем основной поток)
+      fetchParticipantAvatars()
 
       return { success: true, contestId: createResult.idContest }
     } catch (err) {
@@ -201,6 +208,8 @@ export const useContestStore = defineStore('contest', () => {
         speed: p.speed ?? 0,
         accuracy: p.accuracy ?? 0,
         duration: 0,
+        avatarPhoto: null,
+        avatarContentType: 'image/png',
       })
     })
 
@@ -263,7 +272,50 @@ export const useContestStore = defineStore('contest', () => {
         speed: 0,
         accuracy: 0,
         duration: 0,
+        avatarPhoto: null,
+        avatarContentType: 'image/png',
       })
+
+      // Загружаем аватарку нового участника
+      fetchSingleAvatar(data.userId)
+    }
+  }
+
+  /**
+   * Загрузить аватарки всех текущих участников
+   */
+  async function fetchParticipantAvatars() {
+    const ids = Array.from(participants.value.keys())
+    if (ids.length === 0) return
+
+    try {
+      const avatars = await avatarAPI.getAvatarsByUserIds(ids)
+      avatars.forEach((avatar) => {
+        if (participants.value.has(avatar.idUser)) {
+          const participant = participants.value.get(avatar.idUser)
+          participant.avatarPhoto = avatar.photo
+          participant.avatarContentType = avatar.contentType || 'image/png'
+        }
+      })
+    } catch (err) {
+      // Аватарки не критичны — молча игнорируем ошибку
+      console.warn('Failed to load participant avatars:', err)
+    }
+  }
+
+  /**
+   * Загрузить аватарку одного участника
+   */
+  async function fetchSingleAvatar(userId) {
+    try {
+      const avatars = await avatarAPI.getAvatarsByUserIds([userId])
+      if (avatars.length > 0 && participants.value.has(userId)) {
+        const participant = participants.value.get(userId)
+        participant.avatarPhoto = avatars[0].photo
+        participant.avatarContentType = avatars[0].contentType || 'image/png'
+      }
+    } catch (err) {
+      console.warn(`Failed to load avatar for user ${userId}:`, err)
     }
   }
 

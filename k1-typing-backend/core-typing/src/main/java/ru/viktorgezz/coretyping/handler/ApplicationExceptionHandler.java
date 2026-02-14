@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Глобальный обработчик исключений REST-контроллеров приложения.
  */
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "ru.viktorgezz.coretyping")
 @Slf4j
 public class ApplicationExceptionHandler {
 
@@ -78,7 +78,7 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<ErrorResponse> handleException(
             final Exception e
     ) {
-        log.error(e.getMessage(), e);
+        log.error(e.getMessage());
         final ErrorResponse body = new ErrorResponse(
                 ErrorCode.INTERNAL_EXCEPTION.getDefaultMessage(),
                 ErrorCode.INTERNAL_EXCEPTION.getCode()

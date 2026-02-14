@@ -53,6 +53,7 @@ services:
       FRONTEND_PORT: ${FRONTEND_PORT_SECURITY}
       JAVAMELODY_LOGIN: ${JAVAMELODY_LOGIN}
       JAVAMELODY_PASSWORD: ${JAVAMELODY_PASSWORD}
+      POLLINATIONS_TOKENS: ${POLLINATIONS_TOKENS}
     depends_on:
       db-typing:
         condition: service_healthy

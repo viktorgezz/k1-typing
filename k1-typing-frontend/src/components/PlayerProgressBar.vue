@@ -1,10 +1,21 @@
 <script setup>
 import { computed } from 'vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const props = defineProps({
   username: {
     type: String,
     required: true,
+  },
+  /** Base64 photo данные для аватарки (null = заглушка) */
+  avatarPhoto: {
+    type: String,
+    default: null,
+  },
+  /** MIME content type аватарки */
+  avatarContentType: {
+    type: String,
+    default: 'image/png',
   },
   progress: {
     type: Number,
@@ -74,6 +85,11 @@ const placeLabel = computed(() => {
   <div class="player-progress" :class="{ 'current-user': isCurrentUser, finished: isFinished }">
     <div class="player-info">
       <div class="player-name">
+        <UserAvatar
+          :photo="avatarPhoto"
+          :content-type="avatarContentType"
+          size="sm"
+        />
         <span v-if="isCurrentUser" class="you-badge">Вы</span>
         <span class="username">{{ username }}</span>
         <span v-if="isReady && !showStats" class="ready-badge">✓ Готов</span>
@@ -128,7 +144,7 @@ const placeLabel = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 24px;
+  min-height: 28px;
 }
 
 .player-name {

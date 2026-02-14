@@ -14,33 +14,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Глобальный обработчик исключений REST-контроллеров приложения.
+ * Обработчик исключений контроллеров модуля avatar.
  */
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "ru.viktorgezz.avatarmodule")
 @Slf4j
-public class ApplicationExceptionHandler {
+public class AvatarExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(
-            final BusinessException e
-    ) {
+            final BusinessException e) {
         final ErrorResponse body = new ErrorResponse(
                 e.getMessage(),
-                e.getErrorCode().getCode()
-        );
+                e.getErrorCode().getCode());
 
         log.debug(e.getMessage());
 
         return ResponseEntity.status(
-                e.getErrorCode().getStatus() != null ?
-                        e.getErrorCode().getStatus() : HttpStatus.BAD_REQUEST
-        ).body(body);
+                        e.getErrorCode().getStatus() != null ? e.getErrorCode().getStatus()
+                                : HttpStatus.BAD_REQUEST)
+                .body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
-            final MethodArgumentNotValidException e
-    ) {
+            final MethodArgumentNotValidException e) {
         final List<ValidationError> errors = new ArrayList<>();
         e.getBindingResult()
                 .getAllErrors()
@@ -48,30 +45,24 @@ public class ApplicationExceptionHandler {
                     final String fieldName = ((FieldError) error).getField();
                     final String errorCode = error.getDefaultMessage();
                     errors.add(new ValidationError(
-                                    fieldName,
-                                    errorCode
-                            )
-                    );
+                            fieldName,
+                            errorCode));
                 });
 
         final ErrorResponse errorResponse = new ErrorResponse(
-                errors
-        );
+                errors);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(errorResponse);
     }
 
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(
-            final Exception e
-    ) {
+            final Exception e) {
         log.error(e.getMessage(), e);
         final ErrorResponse body = new ErrorResponse(
                 ErrorCode.INTERNAL_EXCEPTION.getDefaultMessage(),
-                ErrorCode.INTERNAL_EXCEPTION.getCode()
-        );
+                ErrorCode.INTERNAL_EXCEPTION.getCode());
         return ResponseEntity.status(ErrorCode.INTERNAL_EXCEPTION.getStatus())
                 .body(body);
     }
