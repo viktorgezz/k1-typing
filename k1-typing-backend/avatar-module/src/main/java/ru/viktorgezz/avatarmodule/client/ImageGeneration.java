@@ -9,6 +9,7 @@ import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.command.CommandAsyncExecutor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -64,7 +66,7 @@ public class ImageGeneration {
         String promptEncoded = encodeForPath(prompt);
         String url = "https://gen.pollinations.ai/image/"
                 + promptEncoded
-                + "?model=flux";
+                + "?model=flux-2-dev";
 
         ResponseEntity<byte[]> responseEntity = restClient.get()
                 .uri(url)
@@ -73,15 +75,21 @@ public class ImageGeneration {
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                         (request, response) -> {
+                            log.debug("tokens: {}", tokens);
+                            log.error("code: {}. text: {}", response.getStatusCode(), response.getStatusText());
                             throw new BusinessException(
                                     ErrorCode.IMAGE_GENERATION_API_ERROR,
                                     response.getStatusText());
                         })
+                .onStatus(HttpStatusCode::is2xxSuccessful,
+                        (requst, response) ->
+                                log.debug("requset succesfull")
+                )
                 .toEntity(byte[].class);
 
-        String contentType = (responseEntity.getHeaders().getContentType() != null)
-                ? responseEntity.getHeaders().getContentType().toString()
-                : MediaType.IMAGE_PNG_VALUE;
+        String contentType = Optional.ofNullable(responseEntity.getHeaders().getContentType())
+                .map(MediaType::toString)
+                .orElse(MediaType.IMAGE_PNG_VALUE);
 
         return new GeneratedImageDto(responseEntity.getBody(), contentType);
     }
@@ -91,16 +99,17 @@ public class ImageGeneration {
      */
     private String getNextToken(final Long idUser) {
         int index = Math.abs(indexToken.getAndIncrement() % tokens.size());
-        log.debug("Using token index: {} for user: {}", index, idUser);
+        String token = tokens.get(index);
+        log.debug("Using token index: {} for user: {}, token: {}", index, idUser, token);
         return tokens.get(index);
     }
 
-    public static String encodeForPath(String value) {
+    private static String encodeForPath(String value) {
         if (value == null || value.isBlank()) {
             return value;
         }
+        value = value.trim().toLowerCase().replace(" ", "_");
         return URLEncoder
-                .encode(value, StandardCharsets.UTF_8)
-                .replace("+", "%20");
+                .encode(value, StandardCharsets.UTF_8);
     }
 }

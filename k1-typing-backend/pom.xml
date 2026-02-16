@@ -17,6 +17,7 @@
     <modules>
         <module>core-typing</module>
         <module>avatar-module</module>
+        <module>app</module>
     </modules>
 
     <properties>

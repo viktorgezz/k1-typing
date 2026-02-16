@@ -1,19 +1,23 @@
 package ru.viktorgezz.coretyping.domain.balance.service;
 
-import jakarta.persistence.EntityExistsException;
-import lombok.RequiredArgsConstructor;
+import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.EntityExistsException;
+import lombok.RequiredArgsConstructor;
+import ru.viktorgezz.coretyping.api_internal.balance.BalanceInternalService;
 import ru.viktorgezz.coretyping.domain.balance.dto.BalanceRsDto;
 import ru.viktorgezz.coretyping.domain.result_item.Place;
 import ru.viktorgezz.coretyping.domain.user.repo.UserRepo;
-
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import ru.viktorgezz.coretyping.exception.BusinessException;
+import ru.viktorgezz.coretyping.exception.ErrorCode;
 
 @Service
 @RequiredArgsConstructor
-public class BalanceServiceImpl implements BalanceService {
+public class BalanceServiceImpl implements BalanceService, BalanceInternalService {
 
     private final UserRepo userRepo;
 
@@ -22,8 +26,7 @@ public class BalanceServiceImpl implements BalanceService {
     public BalanceRsDto findBalanceByIdUser(Long idUser) {
         return new BalanceRsDto(
                 userRepo.findBalanceById(idUser)
-                        .orElseThrow(EntityExistsException::new)
-        );
+                        .orElseThrow(EntityExistsException::new));
     }
 
     @Override
@@ -49,7 +52,15 @@ public class BalanceServiceImpl implements BalanceService {
     @Override
     @Transactional
     public Long withdrawBalance(Long amount) {
+        final Long idUser = getCurrentUser().getId();
+        final Long balanceValue = userRepo.findBalanceById(idUser).orElseThrow(EntityExistsException::new);
+
+        if (balanceValue.compareTo(Math.abs(amount)) < 0) {
+            throw new BusinessException(ErrorCode.INSUFFICIENT_BALANCE, idUser.toString());
+        }
+
         amount = Math.abs(amount) * (-1);
+
         return userRepo.addToBalance(getCurrentUser().getId(), amount);
     }
 

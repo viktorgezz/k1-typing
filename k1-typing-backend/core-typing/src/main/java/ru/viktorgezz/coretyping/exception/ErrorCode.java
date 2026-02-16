@@ -20,6 +20,7 @@ public enum ErrorCode {
     TOKEN_REFRESH_EXPIRED("UNAUTHORIZED", "JWT token is expired", HttpStatus.UNAUTHORIZED),
     PASSWORD_MISMATCH("PASSWORD_MISMATCH", "Current password and new password are not the same", HttpStatus.BAD_REQUEST),
     USERNAME_ALREADY_EXISTS("USERNAME_ALREADY_EXISTS", "Username: %s - already exists", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_BALANCE("INSUFFICIENT_BALANCE", "Insufficient balance for user with id: %s", HttpStatus.CONFLICT),
     INTERNAL_EXCEPTION("INTERNAL_EXCEPTION", "Internal error", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final String code;

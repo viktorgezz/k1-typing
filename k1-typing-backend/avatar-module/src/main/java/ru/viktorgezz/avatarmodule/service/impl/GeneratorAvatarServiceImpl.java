@@ -20,7 +20,7 @@ public class GeneratorAvatarServiceImpl implements GeneratorAvatarService {
     private final AvatarRepo avatarRepo;
 
     @Override
-    @Async
+    @Async("taskExecutorAsync")
     @Transactional
     public void generateAvatarAsync(String promt, Long idUser) {
         GeneratedImageDto imageGenerated = imageGeneration.generateImage(idUser, promt);

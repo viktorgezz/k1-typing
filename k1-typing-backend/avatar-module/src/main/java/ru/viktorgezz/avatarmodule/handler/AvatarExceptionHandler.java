@@ -35,6 +35,21 @@ public class AvatarExceptionHandler {
                 .body(body);
     }
 
+    @ExceptionHandler(ru.viktorgezz.coretyping.exception.BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleCoreBusinessException(
+            final ru.viktorgezz.coretyping.exception.BusinessException e) {
+        final ErrorResponse body = new ErrorResponse(
+                e.getMessage(),
+                e.getErrorCode().getCode());
+
+        log.debug(e.getMessage());
+
+        return ResponseEntity.status(
+                        e.getErrorCode().getStatus() != null ? e.getErrorCode().getStatus()
+                                : HttpStatus.BAD_REQUEST)
+                .body(body);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
             final MethodArgumentNotValidException e) {

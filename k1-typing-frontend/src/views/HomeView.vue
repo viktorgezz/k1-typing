@@ -118,7 +118,7 @@ const roomPageNumbers = computed(() => {
           <template v-if="authStore.isAuthenticated">
             <BalanceDisplay :balance="balanceStore.userBalance" />
             <router-link to="/profile" class="user-greeting user-greeting-link">
-              Привет, <strong>{{ authStore.username || 'Пользователь' }}</strong>
+              Профиль
             </router-link>
           </template>
           <!-- Для гостей -->

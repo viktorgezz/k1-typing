@@ -1,4 +1,4 @@
-package ru.viktorgezz.coretyping;
+package ru.viktorgezz.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,10 +12,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EntityScan(basePackages = "ru.viktorgezz")
 @EnableScheduling
 @EnableAsync
-public class CoreTypingApplication {
+public class K1TypingApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CoreTypingApplication.class, args);
+        SpringApplication.run(K1TypingApplication.class, args);
     }
-
 }

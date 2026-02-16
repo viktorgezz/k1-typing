@@ -209,6 +209,12 @@ const onAvatarGenerated = () => {
                 <path d="M12 3l1.912 5.813a2 2 0 0 0 1.272 1.278L21 12l-5.816 1.909a2 2 0 0 0-1.275 1.278L12 21l-1.912-5.813a2 2 0 0 0-1.272-1.278L3 12l5.816-1.909a2 2 0 0 0 1.275-1.278L12 3z" />
               </svg>
               Сгенерировать
+              <span class="btn-cost">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="coin-icon">
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+                2
+              </span>
             </button>
           </div>
 
@@ -425,10 +431,13 @@ const onAvatarGenerated = () => {
 }
 
 .btn-generate {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 6px;
-  padding: 10px 20px;
+  width: 100%;
+  padding: 10px 14px;
   font-size: 13px;
   font-weight: 600;
   color: #4A3728;
@@ -437,18 +446,38 @@ const onAvatarGenerated = () => {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  white-space: nowrap;
+  box-sizing: border-box;
 }
 
-.btn-generate svg {
+.btn-generate > svg {
   width: 16px;
   height: 16px;
+  flex-shrink: 0;
 }
 
 .btn-generate:hover {
   background: linear-gradient(135deg, var(--peach-light) 0%, var(--coral) 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 160, 122, 0.4);
+}
+
+.btn-cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.btn-cost .coin-icon {
+  width: 14px;
+  height: 14px;
+  color: #ffd700;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6));
 }
 
 /* Правая колонка */

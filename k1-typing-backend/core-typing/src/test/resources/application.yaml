@@ -20,3 +20,7 @@ security:
 logging:
   level:
     ru.viktorgezz.k1_typing_backend: DEBUG
+
+custom:
+  host-frontend: http://localhost
+  port-frontend: 5173

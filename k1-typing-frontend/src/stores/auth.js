@@ -53,7 +53,15 @@ export const useAuthStore = defineStore('auth', () => {
       await authAPI.register(credentials)
       return { success: true }
     } catch (err) {
-      error.value = err.response?.data?.message || 'Ошибка регистрации'
+      const data = err.response?.data
+      if (data?.validationErrors?.length) {
+        // MethodArgumentNotValidException — собираем ошибки полей в одну строку
+        error.value = data.validationErrors
+          .map((e) => e.errorCode)
+          .join(', ')
+      } else {
+        error.value = data?.message || 'Ошибка регистрации'
+      }
       return { success: false, error: error.value }
     } finally {
       loading.value = false
@@ -75,7 +83,12 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = { username: credentials.name }
       return { success: true, data: response }
     } catch (err) {
-      error.value = err.response?.data?.message || 'Ошибка входа'
+      const code = err.response?.data?.code
+      if (code === 'BAD_CREDENTIALS') {
+        error.value = 'Неверное имя пользователя или пароль'
+      } else {
+        error.value = err.response?.data?.message || 'Ошибка входа'
+      }
       return { success: false, error: error.value }
     } finally {
       loading.value = false

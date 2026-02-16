@@ -51,8 +51,13 @@ const handleSubmit = async () => {
     emit('generated')
   } catch (error) {
     console.error('Failed to generate avatar:', error)
-    errorMessage.value =
-      error.response?.data?.message || 'Ошибка при отправке запроса на генерацию'
+    const code = error.response?.data?.code
+    if (code === 'INSUFFICIENT_BALANCE') {
+      errorMessage.value = 'Недостаточно средств'
+    } else {
+      errorMessage.value =
+        error.response?.data?.message || 'Ошибка при отправке запроса на генерацию'
+    }
   }
 }
 </script>

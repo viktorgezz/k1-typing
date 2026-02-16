@@ -1,24 +1,17 @@
 package testconfig;
 
+import com.redis.testcontainers.RedisContainer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import com.redis.testcontainers.RedisContainer;
-
-import ru.viktorgezz.coretyping.CoreTypingApplication;
-
 @Testcontainers
-@SpringBootTest(
-        classes = CoreTypingApplication.class,
-        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
-public abstract class AbstractIntegrationRedisTest extends AbstractIntegrationPostgresTest{
+@SpringBootTest(classes = TestApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public abstract class AbstractIntegrationRedisTest extends AbstractIntegrationPostgresTest {
 
-    private static final RedisContainer REDIS_CONTAINER =
-            new RedisContainer(DockerImageName.parse("redis:7-alpine"));
+    private static final RedisContainer REDIS_CONTAINER = new RedisContainer(DockerImageName.parse("redis:7-alpine"));
 
     static {
         REDIS_CONTAINER.start();

@@ -12,6 +12,11 @@
           <package value="ru.viktorgezz.avatarmodule" />
         </packages>
       </persistence-unit>
+      <persistence-unit moduleName="app" name="Default">
+        <packages>
+          <package value="ru.viktorgezz" />
+        </packages>
+      </persistence-unit>
     </persistence-units>
   </component>
 </project>
