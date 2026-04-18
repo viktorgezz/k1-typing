@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import ru.viktorgezz.avatarmodule.dto.GeneratedImageDto;
+import ru.viktorgezz.avatarmodule.dto.ImageDto;
 import ru.viktorgezz.avatarmodule.exception.BusinessException;
 import ru.viktorgezz.avatarmodule.exception.ErrorCode;
 
@@ -53,7 +53,7 @@ public class ImageGeneration {
                 .build();
     }
 
-    public GeneratedImageDto generateImage(Long idUser, String prompt) {
+    public ImageDto generateImage(Long idUser, String prompt) {
         BucketProxy bucket = proxyManager
                 .builder()
                 .build("image_limit:" + idUser, () -> bucketConfiguration);
@@ -91,7 +91,7 @@ public class ImageGeneration {
                 .map(MediaType::toString)
                 .orElse(MediaType.IMAGE_PNG_VALUE);
 
-        return new GeneratedImageDto(responseEntity.getBody(), contentType);
+        return new ImageDto(responseEntity.getBody(), contentType);
     }
 
     /**

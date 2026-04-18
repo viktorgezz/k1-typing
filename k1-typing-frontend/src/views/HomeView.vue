@@ -123,11 +123,17 @@ const roomPageNumbers = computed(() => {
           </template>
           <!-- Для гостей -->
           <template v-else>
-            <router-link to="/login" class="auth-btn auth-btn-secondary">
-              Войти
+            <router-link to="/login" class="auth-card">
+              <div class="auth-card-glass">
+                <div class="auth-card-refraction"></div>
+              </div>
+              <span class="auth-card-label">Войти</span>
             </router-link>
-            <router-link to="/register" class="auth-btn auth-btn-primary">
-              Регистрация
+            <router-link to="/register" class="auth-card">
+              <div class="auth-card-glass">
+                <div class="auth-card-refraction"></div>
+              </div>
+              <span class="auth-card-label">Регистрация</span>
             </router-link>
           </template>
         </div>
@@ -626,37 +632,58 @@ const roomPageNumbers = computed(() => {
   color: var(--coral);
 }
 
-/* Кнопки авторизации для гостей */
-.auth-btn {
+/* Кнопки авторизации — стиль карточек упражнений */
+.auth-card {
+  position: relative;
   padding: 8px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  border-radius: 8px;
+  border-radius: 12px;
   text-decoration: none;
-  transition: all 0.2s ease;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.auth-btn-secondary {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(74, 55, 40, 0.15);
+.auth-card:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow:
+    0 12px 28px -6px rgba(74, 55, 40, 0.45),
+    0 0 16px rgba(255, 160, 122, 0.12);
 }
 
-.auth-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.5);
+.auth-card-glass {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(74, 55, 40, 0.666);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow:
+    0 4px 16px rgba(74, 55, 40, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.auth-btn-primary {
-  color: var(--text-primary);
-  background: linear-gradient(135deg, var(--coral) 0%, var(--lemon) 100%);
-  border: 1px solid transparent;
-  box-shadow: 0 2px 8px rgba(255, 160, 122, 0.3);
+.auth-card-refraction {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 30% 0%,
+    rgba(255, 200, 160, 0.1) 0%,
+    transparent 50%
+  );
+  opacity: 0.6;
+  pointer-events: none;
 }
 
-.auth-btn-primary:hover {
-  box-shadow: 0 4px 12px rgba(255, 160, 122, 0.4);
-  transform: translateY(-1px);
+.auth-card-label {
+  position: relative;
+  z-index: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.01em;
 }
+
 
 /* Основной контент */
 .main-content {

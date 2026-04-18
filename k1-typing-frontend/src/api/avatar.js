@@ -26,13 +26,15 @@ export const avatarAPI = {
     },
 
     /**
-     * Запустить асинхронную генерацию аватарки по промту.
-     * @param {string} prompt — текстовое описание для генерации
+     * Загрузить фото и установить его как аватарку.
+     * @param {File} file — файл изображения (jpeg, png, gif; до 2 МБ)
      * @returns {Promise<void>}
      */
-    async generateAvatar(prompt) {
-        await apiClient.post('/avatar', null, {
-            params: { promt: prompt },
+    async uploadAvatar(file) {
+        const formData = new FormData()
+        formData.append('file', file)
+        await apiClient.post('/avatar', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
         })
     },
 }

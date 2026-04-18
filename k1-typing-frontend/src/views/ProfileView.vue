@@ -7,7 +7,7 @@ import { useForm, useField } from 'vee-validate'
 import * as yup from 'yup'
 import GlassCard from '@/components/GlassCard.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
-import GenerateAvatarModal from '@/components/GenerateAvatarModal.vue'
+
 import { userAPI } from '@/api/user'
 import { avatarAPI } from '@/api/avatar'
 
@@ -23,7 +23,8 @@ const errorMessage = ref('')
 const showDeleteConfirm = ref(false)
 const isDeleting = ref(false)
 const isLoggingOut = ref(false)
-const showGenerateModal = ref(false)
+const isUploading = ref(false)
+const fileInputRef = ref(null)
 
 // Аватарка
 const avatarPhoto = ref(null)
@@ -144,9 +145,61 @@ const getRoleDisplay = (role) => {
   }
   return roles[role] || role
 }
-// Обработчик успешной отправки генерации
-const onAvatarGenerated = () => {
-  successMessage.value = 'Запрос на генерацию отправлен! Аватарка скоро появится.'
+// Константы валидации загрузки аватарки
+const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2 МБ
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif']
+
+// Открыть диалог выбора файла
+const triggerFileInput = () => {
+  fileInputRef.value?.click()
+}
+
+// Обработчик загрузки файла аватарки
+const handleAvatarUpload = async (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Сброс input, чтобы можно было выбрать тот же файл повторно
+  event.target.value = ''
+
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  // Валидация формата
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    errorMessage.value = 'Неподдерживаемый формат. Допустимы: JPEG, PNG, GIF'
+    return
+  }
+
+  // Валидация размера
+  if (file.size > MAX_FILE_SIZE) {
+    errorMessage.value = `Файл слишком большой. Максимальный размер — 2 МБ`
+    return
+  }
+
+  isUploading.value = true
+  try {
+    await avatarAPI.uploadAvatar(file)
+    // Перезагружаем аватарку после успешной загрузки
+    const updated = await avatarAPI.getMyAvatar()
+    if (updated?.photo) {
+      avatarPhoto.value = updated.photo
+      avatarContentType.value = updated.contentType || 'image/png'
+    }
+    successMessage.value = 'Аватарка успешно обновлена!'
+  } catch (error) {
+    console.error('Failed to upload avatar:', error)
+    const code = error.response?.data?.code
+    if (code === 'INSUFFICIENT_BALANCE') {
+      errorMessage.value = 'Недостаточно средств для установки аватарки'
+    } else if (code === 'UNSUPPORTED_MEDIA_TYPE') {
+      errorMessage.value = 'Сервер не поддерживает данный формат изображения'
+    } else {
+      errorMessage.value = error.response?.data?.message || 'Ошибка при загрузке аватарки'
+    }
+  } finally {
+    isUploading.value = false
+  }
 }
 </script>
 
@@ -201,14 +254,24 @@ const onAvatarGenerated = () => {
             <p class="avatar-hint">
               {{ avatarPhoto ? 'Ваша аватарка' : 'Аватарка не установлена' }}
             </p>
+            <input
+              ref="fileInputRef"
+              type="file"
+              accept="image/jpeg,image/png,image/gif"
+              style="display: none"
+              @change="handleAvatarUpload"
+            />
             <button
-              class="btn-generate"
-              @click="showGenerateModal = true"
+              class="btn-upload"
+              :disabled="isUploading"
+              @click="triggerFileInput"
             >
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3l1.912 5.813a2 2 0 0 0 1.272 1.278L21 12l-5.816 1.909a2 2 0 0 0-1.275 1.278L12 21l-1.912-5.813a2 2 0 0 0-1.272-1.278L3 12l5.816-1.909a2 2 0 0 0 1.275-1.278L12 3z" />
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              Сгенерировать
+              {{ isUploading ? 'Загрузка...' : 'Загрузить фото' }}
               <span class="btn-cost">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="coin-icon">
                   <circle cx="12" cy="12" r="10"/>
@@ -216,6 +279,7 @@ const onAvatarGenerated = () => {
                 2
               </span>
             </button>
+            <p class="upload-limits">JPEG, PNG, GIF · до 2 МБ</p>
           </div>
 
           <!-- Правая колонка: Информация и формы -->
@@ -333,11 +397,7 @@ const onAvatarGenerated = () => {
       </template>
     </GlassCard>
 
-    <!-- Модалка генерации аватарки -->
-    <GenerateAvatarModal
-      v-model="showGenerateModal"
-      @generated="onAvatarGenerated"
-    />
+
   </div>
 </template>
 
@@ -430,7 +490,7 @@ const onAvatarGenerated = () => {
   line-height: 1.4;
 }
 
-.btn-generate {
+.btn-upload {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -449,16 +509,29 @@ const onAvatarGenerated = () => {
   box-sizing: border-box;
 }
 
-.btn-generate > svg {
+.btn-upload > svg {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
 }
 
-.btn-generate:hover {
+.btn-upload:hover:not(:disabled) {
   background: linear-gradient(135deg, var(--peach-light) 0%, var(--coral) 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(255, 160, 122, 0.4);
+}
+
+.btn-upload:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.upload-limits {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin-top: 4px;
 }
 
 .btn-cost {

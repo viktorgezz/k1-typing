@@ -16,7 +16,7 @@ import static ru.viktorgezz.avatarmodule.util.CurrentUserUtils.getCurrentIdUser;
 
 @Service
 @RequiredArgsConstructor
-public class AvatarServiceImpl implements AvatarService {
+public class AvatarQueryServiceImpl implements AvatarService {
 
     private final AvatarRepo avatarRepo;
 
