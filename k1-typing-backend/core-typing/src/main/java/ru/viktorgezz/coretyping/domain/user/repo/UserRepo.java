@@ -13,6 +13,8 @@ public interface UserRepo extends CrudRepository<User, Long> {
 
     User findUserByUsername(String username);
 
+    Optional<User> findByUsername(String username);
+
     @Query("SELECT u.balance FROM User u WHERE u.id = :id")
     Optional<Long> findBalanceById(Long id);
 

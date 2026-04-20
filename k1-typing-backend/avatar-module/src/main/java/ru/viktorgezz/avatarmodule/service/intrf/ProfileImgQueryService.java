@@ -1,0 +1,14 @@
+package ru.viktorgezz.avatarmodule.service.intrf;
+
+import ru.viktorgezz.avatarmodule.dto.AvatarProfileRsDto;
+import ru.viktorgezz.avatarmodule.dto.ParticipantAvatarRsDto;
+
+import java.util.List;
+
+public interface ProfileImgQueryService {
+
+    AvatarProfileRsDto getCurrentUserAvatar();
+
+    List<ParticipantAvatarRsDto> getAvatarsByUserIds(List<Long> idsUser);
+
+}

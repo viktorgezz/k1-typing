@@ -10,7 +10,7 @@ import ru.viktorgezz.coretyping.domain.result_item.dto.rs.ResultListItemRsDto;
 import ru.viktorgezz.coretyping.domain.result_item.repo.ResultItemPagingAndSortingRepo;
 import ru.viktorgezz.coretyping.domain.result_item.repo.ResultItemRepo;
 import ru.viktorgezz.coretyping.domain.result_item.service.intrf.ResultItemQueryService;
-import ru.viktorgezz.coretyping.security.util.CurrentUserUtils;
+import ru.viktorgezz.coretyping.util.CurrentUserUtils;
 
 import java.util.List;
 

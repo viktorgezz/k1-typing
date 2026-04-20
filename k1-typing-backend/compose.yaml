@@ -1,0 +1,35 @@
+services:
+  db-typing:
+    image: postgres:18.0
+    container_name: postgres_typing_db_dev
+    environment:
+      POSTGRES_PASSWORD: strong_password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: typing_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data-typing-dev:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_dev
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass "my_secure_password_123"
+    volumes:
+      - redis-data-dev:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "my_secure_password_123", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data-typing-dev:
+  redis-data-dev:

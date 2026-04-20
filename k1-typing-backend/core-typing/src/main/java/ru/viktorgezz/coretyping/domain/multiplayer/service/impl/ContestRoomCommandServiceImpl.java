@@ -25,7 +25,7 @@ import ru.viktorgezz.coretyping.exception.ErrorCode;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
 
 @Service
 @Slf4j
