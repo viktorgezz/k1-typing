@@ -6,10 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import ru.viktorgezz.coretyping.domain.exercises.Exercise;
 import ru.viktorgezz.coretyping.domain.participant.Participants;
-import ru.viktorgezz.coretyping.security.model.RefreshToken;
+import ru.viktorgezz.security.UserDetailsCustom;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -23,7 +22,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-public class User implements UserDetails {
+public class User implements UserDetailsCustom {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -41,14 +40,6 @@ public class User implements UserDetails {
 
     @Column
     private Long balance = 1L;
-
-    @OneToMany(
-            mappedBy = "user",
-            cascade = CascadeType.ALL,
-            fetch = FetchType.LAZY,
-            orphanRemoval = true
-    )
-    private transient List<RefreshToken> refreshTokens = new ArrayList<>();
 
     @OneToMany(
             mappedBy = "user",
@@ -100,5 +91,10 @@ public class User implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return !credentialsExpired;
+    }
+
+    @Override
+    public String getRoleWithoutPrefix() {
+        return this.role.toString().replace("Role_", "");
     }
 }

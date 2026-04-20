@@ -18,7 +18,7 @@ import ru.viktorgezz.coretyping.domain.result_item.service.intrf.ResultItemComma
 import ru.viktorgezz.coretyping.domain.user.User;
 import ru.viktorgezz.coretyping.domain.user.service.intrf.UserQueryService;
 
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor

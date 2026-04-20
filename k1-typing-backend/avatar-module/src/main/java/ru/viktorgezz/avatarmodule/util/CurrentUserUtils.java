@@ -1,18 +1,18 @@
 package ru.viktorgezz.avatarmodule.util;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.spec.InvalidKeySpecException;
-
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import ru.viktorgezz.avatarmodule.exception.KeyLoadingException;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * Утилитный класс для получения id текущего аутентифицированного пользователя
@@ -32,7 +32,7 @@ public class CurrentUserUtils {
         try {
             PUBLIC_KEY = KeyUtils.loadPublicKey("keys/public_key.pem");
         } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new RuntimeException(e);
+            throw new KeyLoadingException(e.getMessage());
         }
     }
 

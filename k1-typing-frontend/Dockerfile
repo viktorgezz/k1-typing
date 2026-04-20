@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm ci
+RUN npm config set registry https://registry.npmmirror.com && npm ci
 
 # Копируем исходный код
 COPY . .
@@ -25,7 +25,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Устанавливаем serve для статического сервера
-RUN npm install -g serve
+RUN npm config set registry https://registry.npmmirror.com && npm install -g serve
 
 # Копируем собранные файлы из builder
 COPY --from=builder /app/dist ./dist

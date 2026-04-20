@@ -18,7 +18,7 @@ import ru.viktorgezz.coretyping.domain.user.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor

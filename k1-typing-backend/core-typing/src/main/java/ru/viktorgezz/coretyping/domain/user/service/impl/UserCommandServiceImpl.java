@@ -7,7 +7,7 @@ import ru.viktorgezz.coretyping.domain.user.User;
 import ru.viktorgezz.coretyping.domain.user.repo.UserRepo;
 import ru.viktorgezz.coretyping.domain.user.service.intrf.UserCommandService;
 
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor

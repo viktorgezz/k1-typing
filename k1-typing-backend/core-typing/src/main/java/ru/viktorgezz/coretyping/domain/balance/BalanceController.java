@@ -5,7 +5,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.viktorgezz.coretyping.domain.balance.dto.BalanceRsDto;
 import ru.viktorgezz.coretyping.domain.balance.service.BalanceService;
-import ru.viktorgezz.coretyping.security.util.CurrentUserUtils;
+import ru.viktorgezz.coretyping.util.CurrentUserUtils;
 
 @RestController
 @RequiredArgsConstructor

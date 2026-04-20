@@ -12,7 +12,7 @@ import ru.viktorgezz.coretyping.domain.multiplayer.service.intrf.ContestWebSocke
 
 import java.security.Principal;
 
-import static ru.viktorgezz.coretyping.security.util.WebSocketUserUtils.getUserFromPrincipal;
+import static ru.viktorgezz.coretyping.util.WebSocketUserUtils.getUserFromPrincipal;
 
 @Slf4j
 @Controller

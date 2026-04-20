@@ -1,6 +1,6 @@
 package ru.viktorgezz.coretyping.domain.balance.service;
 
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;

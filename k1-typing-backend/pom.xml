@@ -15,6 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>security</module>
         <module>core-typing</module>
         <module>avatar-module</module>
         <module>app</module>

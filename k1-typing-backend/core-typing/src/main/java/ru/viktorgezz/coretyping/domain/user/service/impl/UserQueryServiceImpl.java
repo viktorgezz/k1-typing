@@ -11,7 +11,7 @@ import ru.viktorgezz.coretyping.domain.user.service.intrf.UserQueryService;
 
 import java.util.Optional;
 
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
 
 @Service
 @RequiredArgsConstructor

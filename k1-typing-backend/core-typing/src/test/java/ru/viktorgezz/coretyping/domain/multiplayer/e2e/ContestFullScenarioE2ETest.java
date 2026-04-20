@@ -40,7 +40,7 @@ import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.RoomServi
 import ru.viktorgezz.coretyping.domain.result_item.Place;
 import ru.viktorgezz.coretyping.domain.result_item.repo.ResultItemRepo;
 import ru.viktorgezz.coretyping.domain.user.repo.UserRepo;
-import ru.viktorgezz.coretyping.security.repo.RefreshTokenRepo;
+import ru.viktorgezz.security.repo.RefreshTokenRepo;
 import testconfig.AbstractWebSocketE2ETest;
 
 class ContestFullScenarioE2ETest extends AbstractWebSocketE2ETest {

@@ -18,16 +18,13 @@ import ru.viktorgezz.coretyping.domain.user.User;
 import ru.viktorgezz.coretyping.domain.user.service.intrf.UserCommandService;
 import ru.viktorgezz.coretyping.exception.BusinessException;
 import ru.viktorgezz.coretyping.exception.ErrorCode;
-import ru.viktorgezz.coretyping.security.exception.InvalidJwtTokenException;
-import ru.viktorgezz.coretyping.security.exception.TokenExpiredException;
-import ru.viktorgezz.coretyping.security.model.RefreshToken;
-import ru.viktorgezz.coretyping.security.repo.RefreshTokenRepo;
-import ru.viktorgezz.coretyping.security.service.JwtService;
+import ru.viktorgezz.security.service.JwtService;
+import ru.viktorgezz.security.service.RefreshTokenService;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
-import static ru.viktorgezz.coretyping.security.util.CurrentUserUtils.getCurrentUser;
+import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
 
 /**
  * Сервис аутентификации пользователей. Реализует {@link AuthenticationService}.
@@ -41,7 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final UserCommandService userCommandService;
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest authRq) {
@@ -58,8 +55,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         final User user = (User) authentication.getPrincipal();
-        final String accessToken = jwtService.generateAccessToken(user.getUsername());
-        final String refreshToken = jwtService.generateRefreshToken(user.getUsername());
+        final String accessToken = jwtService.generateAccessToken(user);
+        final String refreshToken = jwtService.generateRefreshToken(user);
         final String tokenType = "Bearer";
 
         log.debug("acces token: {}", accessToken);
@@ -74,6 +71,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void register(RegistrationRequest request, Role role) {
         checkPasswords(request.password(), request.confirmPassword());
+
         final User user = new User(
                 request.username(),
                 request.password(),
@@ -82,6 +80,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 false,
                 false
         );
+
         user.setPassword(passwordEncoder.encode(request.password()));
         userCommandService.save(user);
         log.debug("Registering user: {}", user);
@@ -98,7 +97,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     request.refreshToken(),
                     tokenType
             );
-        } catch (InvalidJwtTokenException | TokenExpiredException e) {
+        } catch (Exception e) {
             log.debug("Refresh token expired/invalid: {}", e.getMessage());
             throw new BusinessException(ErrorCode.TOKEN_REFRESH_EXPIRED);
         }
@@ -108,14 +107,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public void logout(String refreshToken) {
         try {
-            final Long idUser = getCurrentUser().getId();
-            final List<String> refreshTokens = refreshTokenRepo.findRefreshTokensByIdUser(idUser)
-                    .stream()
-                    .map(RefreshToken::getToken)
-                    .toList();
+            final String username = getCurrentUser().getUsername();
+            final List<String> refreshTokens = refreshTokenService
+                    .findValuesRefreshTokensByUsername(username);
 
-            log.debug("current refreshToken: {}, id user: {}, refreshTokens: {}",
-                    refreshToken, idUser, refreshTokens);
+            log.debug("current refreshToken: {}, username: {}, refreshTokens: {}",
+                    refreshToken, username, refreshTokens);
 
             if (!refreshTokens.contains(refreshToken)) {
                 throw new AccessDeniedException("Token does not belong to current user");

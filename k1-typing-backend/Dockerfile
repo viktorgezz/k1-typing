@@ -4,12 +4,14 @@ WORKDIR /app
 COPY pom.xml .
 COPY core-typing/pom.xml core-typing/
 COPY avatar-module/pom.xml avatar-module/
+COPY security/pom.xml security/
 COPY app/pom.xml app/
 
 RUN mvn dependency:go-offline
 
 COPY core-typing/src core-typing/src
 COPY avatar-module/src avatar-module/src
+COPY security/src security/src
 COPY app/src app/src
 
 RUN mvn clean install -DskipTests

@@ -12,7 +12,7 @@ import ru.viktorgezz.coretyping.domain.exercises.service.intrf.ExerciseCommandSe
 import ru.viktorgezz.coretyping.domain.user.User;
 import ru.viktorgezz.coretyping.exception.BusinessException;
 import ru.viktorgezz.coretyping.exception.ErrorCode;
-import ru.viktorgezz.coretyping.security.util.CurrentUserUtils;
+import ru.viktorgezz.coretyping.util.CurrentUserUtils;
 
 import java.util.List;
 
