@@ -5,7 +5,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm ci
+RUN npm config set registry https://registry.npmmirror.com && npm ci
 
 # Копируем исходный код
 COPY . .
