@@ -5,6 +5,7 @@ COPY pom.xml .
 COPY core-typing/pom.xml core-typing/
 COPY avatar-module/pom.xml avatar-module/
 COPY security/pom.xml security/
+COPY statistics-result-module/pom.xml statistics-result-module/
 COPY app/pom.xml app/
 
 RUN mvn dependency:go-offline
@@ -12,6 +13,7 @@ RUN mvn dependency:go-offline
 COPY core-typing/src core-typing/src
 COPY avatar-module/src avatar-module/src
 COPY security/src security/src
+COPY statistics-result-module/src statistics-result-module/src
 COPY app/src app/src
 
 RUN mvn clean install -DskipTests

@@ -15,16 +15,21 @@ import ru.viktorgezz.coretyping.domain.contest.service.intrf.ContestQueryService
 import ru.viktorgezz.coretyping.domain.multiplayer.dto.websocket.*;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.*;
 import ru.viktorgezz.coretyping.domain.multiplayer.service.intrf.ContestWebSocketService;
-import ru.viktorgezz.coretyping.domain.result_item.Place;
-import ru.viktorgezz.coretyping.domain.result_item.dto.rq.MultiplayerResultItemDto;
-import ru.viktorgezz.coretyping.domain.result_item.service.intrf.ResultItemCommandService;
-import ru.viktorgezz.coretyping.domain.result_item.service.intrf.ResultItemQueryService;
+import ru.viktorgezz.coretyping.domain.user.dto.UserView;
+import ru.viktorgezz.coretyping.domain.user.service.intrf.UserQueryService;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
+import ru.viktorgezz.statistics_result_module.result_item.ResultItem;
+import ru.viktorgezz.statistics_result_module.result_item.dto.rq.MultiplayerResultItemDto;
+import ru.viktorgezz.statistics_result_module.result_item.service.intrf.ResultItemCommandService;
+import ru.viktorgezz.statistics_result_module.result_item.service.intrf.ResultItemQueryService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ru.viktorgezz.coretyping.domain.multiplayer.util.WebsocketTopicStorage.*;
@@ -50,6 +55,7 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
     private final ContestCommandService contestCommandService;
     private final ResultItemCommandService resultItemCommandService;
     private final ResultItemQueryService resultItemQueryService;
+    private final UserQueryService userQueryService;
 
     private final ContestWebSocketService self;
 
@@ -68,7 +74,7 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
             ContestQueryService contestQueryService,
             ContestCommandService contestCommandService,
             ResultItemCommandService resultItemCommandService,
-            ResultItemQueryService resultItemQueryService,
+            ResultItemQueryService resultItemQueryService, UserQueryService userQueryService,
             @Lazy ContestWebSocketService self
     ) {
         this.messagingTemplate = messagingTemplate;
@@ -83,6 +89,7 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
         this.contestCommandService = contestCommandService;
         this.resultItemCommandService = resultItemCommandService;
         this.resultItemQueryService = resultItemQueryService;
+        this.userQueryService = userQueryService;
         this.self = self;
     }
 
@@ -233,11 +240,19 @@ public class ContestWebSocketServiceImpl implements ContestWebSocketService {
 
     // Собирает лидерборд: маппит результаты из БД
     private List<ContestFinishedMessage.LeaderboardEntry> buildLeaderboard(Long idContest) {
-        return resultItemQueryService.findAllByContest(idContest)
+        List<ResultItem> results = resultItemQueryService.findAllByContest(idContest);
+        Set<Long> idsUser = results.stream().map(ResultItem::getIdUser).collect(Collectors.toSet());
+        List<UserView> userViews = userQueryService.findUserViewByIds(idsUser);
+        Map<Long, String> idAndUsernameMapping = userViews.stream()
+                .collect(Collectors.toMap(
+                        UserView::getId,
+                        UserView::getUsername
+                ));
+        return results
                 .stream()
                 .map(result -> new ContestFinishedMessage.LeaderboardEntry(
-                        result.getUser().getId(),
-                        result.getUser().getUsername(),
+                        result.getId(),
+                        idAndUsernameMapping.get(result.getIdUser()),
                         result.getPlace(),
                         result.getDurationSeconds(),
                         result.getSpeed(),

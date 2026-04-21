@@ -5,7 +5,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.FinishService;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.ParticipantsService;
-import ru.viktorgezz.coretyping.domain.result_item.Place;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
 
 import java.util.Objects;
 

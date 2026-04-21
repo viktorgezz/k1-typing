@@ -117,12 +117,21 @@ const roomPageNumbers = computed(() => {
           <!-- Для авторизованных пользователей -->
           <template v-if="authStore.isAuthenticated">
             <BalanceDisplay :balance="balanceStore.userBalance" />
+            <router-link to="/statistics" class="user-greeting user-greeting-link">
+              Статистика
+            </router-link>
             <router-link to="/profile" class="user-greeting user-greeting-link">
               Профиль
             </router-link>
           </template>
           <!-- Для гостей -->
           <template v-else>
+            <router-link to="/statistics" class="auth-card">
+              <div class="auth-card-glass">
+                <div class="auth-card-refraction"></div>
+              </div>
+              <span class="auth-card-label">Статистика</span>
+            </router-link>
             <router-link to="/login" class="auth-card">
               <div class="auth-card-glass">
                 <div class="auth-card-refraction"></div>

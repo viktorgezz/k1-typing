@@ -15,6 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>statistics-result-module</module>
         <module>security</module>
         <module>core-typing</module>
         <module>avatar-module</module>

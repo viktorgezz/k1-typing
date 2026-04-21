@@ -37,10 +37,10 @@ import ru.viktorgezz.coretyping.domain.multiplayer.dto.websocket.PlayerFinishedM
 import ru.viktorgezz.coretyping.domain.multiplayer.dto.websocket.PlayerJoinedMessage;
 import ru.viktorgezz.coretyping.domain.multiplayer.dto.websocket.ProgressUpdateMessage;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.RoomService;
-import ru.viktorgezz.coretyping.domain.result_item.Place;
-import ru.viktorgezz.coretyping.domain.result_item.repo.ResultItemRepo;
 import ru.viktorgezz.coretyping.domain.user.repo.UserRepo;
 import ru.viktorgezz.security.repo.RefreshTokenRepo;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
+import ru.viktorgezz.statistics_result_module.result_item.repo.ResultItemRepo;
 import testconfig.AbstractWebSocketE2ETest;
 
 class ContestFullScenarioE2ETest extends AbstractWebSocketE2ETest {

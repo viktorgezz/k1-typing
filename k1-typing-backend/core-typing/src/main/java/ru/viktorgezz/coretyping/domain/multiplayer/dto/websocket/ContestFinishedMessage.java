@@ -2,7 +2,7 @@ package ru.viktorgezz.coretyping.domain.multiplayer.dto.websocket;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
-import ru.viktorgezz.coretyping.domain.result_item.Place;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
 
 import java.math.BigDecimal;
 import java.util.List;

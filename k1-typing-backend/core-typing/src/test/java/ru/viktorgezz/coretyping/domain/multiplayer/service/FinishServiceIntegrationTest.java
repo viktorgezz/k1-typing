@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.FinishService;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.ParticipantsService;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.RoomService;
-import ru.viktorgezz.coretyping.domain.result_item.Place;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
 import testconfig.AbstractIntegrationRedisTest;
 
 import static org.assertj.core.api.Assertions.assertThat;

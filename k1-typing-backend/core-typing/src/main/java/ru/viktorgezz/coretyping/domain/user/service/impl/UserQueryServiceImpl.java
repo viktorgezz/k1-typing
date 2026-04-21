@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.viktorgezz.coretyping.domain.user.User;
+import ru.viktorgezz.coretyping.domain.user.dto.UserView;
 import ru.viktorgezz.coretyping.domain.user.repo.UserRepo;
 import ru.viktorgezz.coretyping.domain.user.service.intrf.UserQueryService;
 
+import java.util.List;
 import java.util.Optional;
 
 import static ru.viktorgezz.coretyping.util.CurrentUserUtils.getCurrentUser;
@@ -33,6 +35,13 @@ public class UserQueryServiceImpl implements UserQueryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<UserView> findUserViewByIds(Iterable<Long> idsUser) {
+        return userRepo.findUserViewByIds(idsUser);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public User findUserByUsername(String username) {
         return userRepo.findUserByUsername(username);
     }

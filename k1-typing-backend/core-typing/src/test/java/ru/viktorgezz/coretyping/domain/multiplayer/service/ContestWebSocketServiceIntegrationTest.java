@@ -42,12 +42,12 @@ import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.ProgressS
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.ReadyService;
 import ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf.RoomService;
 import ru.viktorgezz.coretyping.domain.multiplayer.service.intrf.ContestWebSocketService;
-import ru.viktorgezz.coretyping.domain.result_item.Place;
-import ru.viktorgezz.coretyping.domain.result_item.ResultItem;
-import ru.viktorgezz.coretyping.domain.result_item.repo.ResultItemRepo;
 import ru.viktorgezz.coretyping.domain.user.Role;
 import ru.viktorgezz.coretyping.domain.user.User;
 import ru.viktorgezz.coretyping.domain.user.repo.UserRepo;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
+import ru.viktorgezz.statistics_result_module.result_item.ResultItem;
+import ru.viktorgezz.statistics_result_module.result_item.repo.ResultItemRepo;
 import testconfig.AbstractIntegrationRedisTest;
 
 class ContestWebSocketServiceIntegrationTest extends AbstractIntegrationRedisTest {
@@ -189,8 +189,8 @@ class ContestWebSocketServiceIntegrationTest extends AbstractIntegrationRedisTes
 
         List<ResultItem> resultsFound = resultItemRepo.findAllByContestIdOrderByPlaceAsc(contestSaved.getId());
         assertThat(resultsFound).hasSize(1);
-        ResultItem resultItem = resultsFound.get(0);
-        assertThat(resultItem.getUser().getId()).isEqualTo(userFirst.getId());
+        ResultItem resultItem = resultsFound.getFirst();
+        assertThat(resultItem.getIdUser()).isEqualTo(userFirst.getId());
         assertThat(resultItem.getSpeed()).isEqualTo(180);
         assertThat(resultItem.getDurationSeconds()).isEqualTo(90L);
         assertThat(resultItem.getAccuracy()).isEqualByComparingTo(new BigDecimal("98.00"));
@@ -318,7 +318,7 @@ class ContestWebSocketServiceIntegrationTest extends AbstractIntegrationRedisTes
         ContestFinishedMessage messageResult = contestWebSocketService.finishContestTransaction(contestSaved.getId());
 
         assertThat(messageResult.leaderboard()).hasSize(1);
-        ContestFinishedMessage.LeaderboardEntry entryFirst = messageResult.leaderboard().get(0);
+        ContestFinishedMessage.LeaderboardEntry entryFirst = messageResult.leaderboard().getFirst();
         assertThat(entryFirst.idUser()).isEqualTo(userFirst.getId());
         assertThat(entryFirst.place()).isEqualTo(Place.FIRST);
     }

@@ -44,7 +44,9 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/register",
             "/auth/refresh",
-            "/ui/auth/**"
+            "/ui/auth/**",
+            "/statistics/leaderboard",
+            "/statistics/exercise"
     };
 
     /**

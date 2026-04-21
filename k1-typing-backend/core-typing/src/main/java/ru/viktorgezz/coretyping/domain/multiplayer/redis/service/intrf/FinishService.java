@@ -1,6 +1,6 @@
 package ru.viktorgezz.coretyping.domain.multiplayer.redis.service.intrf;
 
-import ru.viktorgezz.coretyping.domain.result_item.Place;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
 
 public interface FinishService {
 

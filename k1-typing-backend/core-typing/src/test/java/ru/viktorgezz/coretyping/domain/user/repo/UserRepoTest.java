@@ -1,118 +1,122 @@
 package ru.viktorgezz.coretyping.domain.user.repo;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import ru.viktorgezz.coretyping.domain.user.Role;
 import ru.viktorgezz.coretyping.domain.user.User;
-import testconfig.AbstractIntegrationPostgresTest;
+import ru.viktorgezz.coretyping.domain.user.dto.UserView;
+import testconfig.AbstractRepositoryTest;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DisplayName("UserRepo Tests")
-class UserRepoTest extends AbstractIntegrationPostgresTest {
+@DataJpaTest
+class UserRepoTest extends AbstractRepositoryTest {
 
     @Autowired
     private UserRepo userRepo;
 
-    private User userExisting;
+    @Autowired
+    private TestEntityManager entityManager;
+
+    private User userPersisted;
 
     @BeforeEach
     void setUp() {
-        userExisting = userRepo.save(
-                new User(
-                        "testUsername",
-                        "password123",
-                        Role.USER,
-                        true,
-                        false,
-                        false
-                )
+        final String password = "1234567654";
+        final String name = "test1";
+        User user = new User(
+                name,
+                password,
+                Role.USER,
+                true,
+                false,
+                false
         );
+        user.setBalance(100L);
+        userPersisted = entityManager.persistAndFlush(user);
+        entityManager.clear(); // Очищаем кэш, чтобы тесты шли честно в БД
     }
 
-    @AfterEach
-    void tearDown() {
-        userRepo.deleteAll();
+    @Test
+    @DisplayName("Поиск по существующему имени пользователя")
+    void findUserByUsername_ExistingUsername_ReturnsUser() {
+        // Arrange
+        String usernameExisting = "test1";
+
+        // Act
+        User userFound = userRepo.findUserByUsername(usernameExisting);
+
+        // Assert (Self-validating)
+        assertThat(userFound).isNotNull();
+        assertThat(userFound.getUsername()).isEqualTo(usernameExisting);
     }
 
-    @Nested
-    @DisplayName("findUserByUsername")
-    class FindUserByUsernameTests {
+    @Test
+    @DisplayName("Поиск проекций по списку идентификаторов")
+    void findUserViewByIds_ValidIds_ReturnsUserViewList() {
+        // Arrange
+        List<Long> idsToFind = List.of(userPersisted.getId());
 
-        @Test
-        @DisplayName("Возврат пользователя при поиске по существующему имени")
-        void findUserByUsername_ShouldReturnUser_WhenUsernameExists() {
-            User userFound = userRepo.findUserByUsername(userExisting.getUsername());
+        // Act
+        List<UserView> viewsFound = userRepo.findUserViewByIds(idsToFind);
 
-            assertThat(userFound).isNotNull();
-            assertThat(userFound.getId()).isEqualTo(userExisting.getId());
-        }
+        // Assert
+        UserView viewFirst = viewsFound.getFirst();
+        assertThat(viewFirst.getId()).isEqualTo(userPersisted.getId());
+        assertThat(viewFirst.getUsername()).isEqualTo("test1");
+    }
 
-        @Test
-        @DisplayName("Возврат null при поиске по несуществующему имени")
-        void findUserByUsername_ShouldReturnNull_WhenUsernameNotExists() {
-            String usernameNonExistent = "nonExistentUsername";
+    @Test
+    @DisplayName("Получение баланса по существующему ID")
+    void findBalanceById_ExistingId_ReturnsBalanceOptional() {
+        // Arrange
+        Long idExisting = userPersisted.getId();
 
-            User userFound = userRepo.findUserByUsername(usernameNonExistent);
+        // Act
+        Optional<Long> balanceOptional = userRepo.findBalanceById(idExisting);
 
-            assertThat(userFound).isNull();
-        }
+        // Assert
+        assertThat(balanceOptional).isPresent();
+        assertThat(balanceOptional).contains(100L);
+    }
 
-        @Test
-        @DisplayName("Найденный пользователь содержит корректные данные")
-        void findUserByUsername_ShouldReturnUserWithCorrectData_WhenUsernameExists() {
-            User userFound = userRepo.findUserByUsername(userExisting.getUsername());
+    @Test
+    @DisplayName("Увеличение баланса пользователя")
+    void addToBalance_PositiveAmount_UpdatesBalanceAndReturnsCount() {
+        // Arrange
+        Long idTarget = userPersisted.getId();
+        Long amountToAdd = 50L;
 
-            assertThat(userFound.getUsername()).isEqualTo("testUsername");
-            assertThat(userFound.getPassword()).isEqualTo("password123");
-            assertThat(userFound.getRole()).isEqualTo(Role.USER);
-            assertThat(userFound.isEnabled()).isTrue();
-        }
+        // Act
+        long rowsUpdated = userRepo.addToBalance(idTarget, amountToAdd);
+        entityManager.flush();
+        entityManager.clear();
 
-        @Test
-        @DisplayName("Поиск чувствителен к регистру имени пользователя")
-        void findUserByUsername_ShouldReturnNull_WhenUsernameCaseDiffers() {
-            String usernameUpperCase = userExisting.getUsername().toUpperCase();
+        // Assert
+        Optional<Long> balanceUpdated = userRepo.findBalanceById(idTarget);
+        assertThat(rowsUpdated).isEqualTo(1);
+        assertThat(balanceUpdated).isPresent();
+        assertThat(balanceUpdated).contains(150L);
+    }
 
-            User userFound = userRepo.findUserByUsername(usernameUpperCase);
+    @Test
+    @DisplayName("Поиск по несуществующему имени")
+    void findUserByUsername_NonExistentUsername_ReturnsNull() {
+        // Arrange
+        String usernameMissing = "unknown_user";
 
-            assertThat(userFound).isNull();
-        }
+        // Act
+        User userNull = userRepo.findUserByUsername(usernameMissing);
 
-        @Test
-        @DisplayName("Корректный поиск среди нескольких пользователей")
-        void findUserByUsername_ShouldReturnCorrectUser_WhenMultipleUsersExist() {
-            User userSecond = userRepo.save(
-                    new User(
-                            "anotherUser",
-                            "password456",
-                            Role.ADMIN,
-                            true,
-                            false,
-                            false
-                    )
-            );
-
-            User userFound = userRepo.findUserByUsername("anotherUser");
-
-            assertThat(userFound).isNotNull();
-            assertThat(userFound.getId()).isEqualTo(userSecond.getId());
-            assertThat(userFound.getRole()).isEqualTo(Role.ADMIN);
-        }
-
-        @Test
-        @DisplayName("Возврат null при поиске с пустой строкой")
-        void findUserByUsername_ShouldReturnNull_WhenUsernameEmpty() {
-            String usernameEmpty = "";
-
-            User userFound = userRepo.findUserByUsername(usernameEmpty);
-
-            assertThat(userFound).isNull();
-        }
+        // Assert
+        assertThat(userNull).isNull();
     }
 }

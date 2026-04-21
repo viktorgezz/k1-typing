@@ -1,6 +1,9 @@
 package ru.viktorgezz.coretyping.domain.user.service.intrf;
 
 import ru.viktorgezz.coretyping.domain.user.User;
+import ru.viktorgezz.coretyping.domain.user.dto.UserView;
+
+import java.util.List;
 
 public interface UserQueryService {
 
@@ -9,6 +12,8 @@ public interface UserQueryService {
     User getOne(Long id);
 
     User getMyself();
+
+    List<UserView> findUserViewByIds(Iterable<Long> idsUser);
 
     User findUserByUsername(String username);
 }

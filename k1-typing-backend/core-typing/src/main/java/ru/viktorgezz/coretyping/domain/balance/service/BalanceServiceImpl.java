@@ -10,10 +10,10 @@ import jakarta.persistence.EntityExistsException;
 import lombok.RequiredArgsConstructor;
 import ru.viktorgezz.coretyping.api_internal.balance.BalanceInternalService;
 import ru.viktorgezz.coretyping.domain.balance.dto.BalanceRsDto;
-import ru.viktorgezz.coretyping.domain.result_item.Place;
 import ru.viktorgezz.coretyping.domain.user.repo.UserRepo;
 import ru.viktorgezz.coretyping.exception.BusinessException;
 import ru.viktorgezz.coretyping.exception.ErrorCode;
+import ru.viktorgezz.statistics_result_module.result_item.Place;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +34,8 @@ public class BalanceServiceImpl implements BalanceService, BalanceInternalServic
     @Transactional
     public void replenishBalanceByIdUserAndPlaceAsync(
             Long idUser,
-            Place place) {
+            Place place
+    ) {
         final Long reward = getRewardByPlace(place);
         if (reward == null) {
             return;

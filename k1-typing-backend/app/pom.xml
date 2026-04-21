@@ -26,6 +26,11 @@
             <artifactId>security</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>ru.viktorgezz</groupId>
+            <artifactId>statistics-result-module</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>

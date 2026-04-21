@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.viktorgezz.coretyping.domain.exercises.Exercise;
 import ru.viktorgezz.coretyping.domain.participant.Participants;
-import ru.viktorgezz.coretyping.domain.result_item.ResultItem;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,14 +44,6 @@ public class Contest {
             fetch = FetchType.LAZY
     )
     private List<Participants> participants;
-
-    @OneToMany(
-            mappedBy = "contest",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-    )
-    private List<ResultItem> resultItems;
 
     public Contest(Status status, Integer amount, Exercise exercise) {
         this.status = status;
